@@ -16,6 +16,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.http.*
 import javafx.scene.control.Alert
+import javafx.scene.control.CheckBox
 import javafx.scene.control.ComboBox
 import javafx.stage.FileChooser
 import javafx.stage.Window
@@ -33,7 +34,7 @@ class FireporterViewModel(
         progressTracker.totalSteps = 8
     }
 
-    suspend fun generate(host: String, token: String, periodComboBox: ComboBox<String>, yearComboBox: ComboBox<Int>, theme: Theme) {
+    suspend fun generate(host: String, token: String, periodComboBox: ComboBox<String>, yearComboBox: ComboBox<Int>, theme: Theme, includeAttachmentCheckBox: CheckBox) {
         cred.host = host
         cred.token = token
         if (!testConnection(host, token)) return
@@ -44,11 +45,11 @@ class FireporterViewModel(
         val mainWindow = periodComboBox.scene.window
 
         try {
-            val data = dataCollectorService.getData(dateRange, theme)
+            val data = dataCollectorService.getData(dateRange, theme, includeAttachmentCheckBox.isSelected)
             progressTracker.report("Generating PDF File")
             val outputFile = showSaveDialog(mainWindow, period, year.toString()) ?: throw IllegalStateException("StandaloneCoroutine was cancelled")
 
-            jasperReportService.generatePdf(data, outputFile, theme)
+            jasperReportService.generatePdf(data, outputFile, theme, includeAttachmentCheckBox.isSelected)
 
             progressTracker.report("Complete")
 

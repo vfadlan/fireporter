@@ -247,18 +247,24 @@ class FireporterController(
     private lateinit var hostProtocolComboBox: ComboBox<String>
 
     @FXML
+    private lateinit var includeAttachmentsCheckBox: CheckBox
+
+    @FXML
     private fun generateBtnOnAction() {
         val host = hostProtocolComboBox.selectionModel.selectedItemProperty().value + hostTextField.text
         val token = tokenTextArea.text
 
-        cancelBtn.isDisable = false
         disableAllThemeButtons()
+        includeAttachmentsCheckBox.isDisable = true
+        cancelBtn.isDisable = false
 
         progressTracker.reset()
         job = controllerScope.launch {
-            viewModel.generate(host, token, periodComboBox, yearComboBox, activeTheme)
-            cancelBtn.isDisable = true
+            viewModel.generate(host, token, periodComboBox, yearComboBox, activeTheme, includeAttachmentsCheckBox)
+
+            includeAttachmentsCheckBox.isDisable = false
             enableAllThemeButtons()
+            cancelBtn.isDisable = true
         }
     }
 

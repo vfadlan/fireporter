@@ -69,7 +69,8 @@ class JasperReportService {
     suspend fun generatePdf(
         data: ReportData,
         outputFile: File,
-        theme: Theme
+        theme: Theme,
+        withAttachment: Boolean
     ) {
         withContext(Dispatchers.IO) {
             val params = HashMap<String, Any>()
@@ -81,6 +82,7 @@ class JasperReportService {
             params.loadAttachments(data, loadCompiledReport("report-attachment"))
             params.loadSysInfo(data)
 
+            params["WITH_ATTACHMENT"] = withAttachment
             params["DISCLAIMER_REPORT"] = loadCompiledReport("report-disclaimer")
 
             val print = JasperFillManager.fillReport(loadCompiledReport("book"), params, JREmptyDataSource())

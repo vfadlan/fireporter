@@ -12,6 +12,7 @@
 	<dataset name="TRANSACTION_HISTORY" uuid="12cc3934-6a8e-4268-a096-afddae6c6d9e">
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
 		<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
+		<parameter name="WITH_ATTACHMENT" class="java.lang.Boolean"/>
 		<query language="sql"><![CDATA[]]></query>
 		<field name="transactionJournalId" class="java.lang.String"/>
 		<field name="type" class="java.lang.String"/>
@@ -45,6 +46,7 @@
 	<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
 	<parameter name="DATE_RANGE" class="com.fadlan.fireporter.model.DateRangeBoundaries"/>
 	<parameter name="TRANSACTION_HISTORY_DATASET" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<parameter name="WITH_ATTACHMENT" class="java.lang.Boolean"/>
 	<group name="Transactions">
 		<groupHeader>
 			<band height="60">
@@ -92,7 +94,7 @@
 								<paragraph leftIndent="8"/>
 								<expression><![CDATA["View"]]></expression>
 								<anchorNameExpression><![CDATA[$F{elementId}]]></anchorNameExpression>
-								<printWhenExpression><![CDATA[$F{hasAttachments}]]></printWhenExpression>
+								<printWhenExpression><![CDATA[$F{hasAttachments} && $P{WITH_ATTACHMENT}]]></printWhenExpression>
 								<hyperlinkAnchorExpression><![CDATA[$F{firstAttachmentElementId}]]></hyperlinkAnchorExpression>
 							</element>
 						</contents>

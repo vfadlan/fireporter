@@ -39,7 +39,7 @@ class DataCollectorService(
     private lateinit var downloadedAttachments: MutableList<Attachment>
     private lateinit var apiSysInfo: SystemInfoResponse
 
-    private suspend fun collectData(dateRange: DateRangeBoundaries) {
+    private suspend fun collectData(dateRange: DateRangeBoundaries, withAttachment: Boolean) {
         progressTracker.report("Collecting accounts and charts data")
         accounts = accountRepository.getAccountStatistics(dateRange)
         if (!accountRepository.hasActiveAccountInRange(dateRange, accounts)) throw InactiveAccountException()
@@ -58,7 +58,8 @@ class DataCollectorService(
         transactionJournals = transactionRepository.getTransactionJournals(dateRange, generalOverview)
 
         progressTracker.report("Downloading attachments")
-        downloadedAttachments = attachmentService.downloadAttachments(transactionJournals.filter { it.hasAttachments })
+        downloadedAttachments = if (withAttachment) attachmentService.downloadAttachments(transactionJournals.filter { it.hasAttachments })
+                                else mutableListOf()
 
         apiSysInfo = requestApiInfo(cred.host, cred.token).body()
     }
@@ -84,9 +85,9 @@ class DataCollectorService(
         }
     }
 
-    suspend fun getData(dateRange: DateRangeBoundaries, theme: Theme): ReportData {
+    suspend fun getData(dateRange: DateRangeBoundaries, theme: Theme, withAttachment: Boolean): ReportData {
         checkDateRange(dateRange)
-        collectData(dateRange)
+        collectData(dateRange, withAttachment)
         setMainCurrency()
 
         return ReportData(
