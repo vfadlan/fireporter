@@ -1,6 +1,6 @@
 # Fireporter: Firefly III PDF Exporter
 
-![ui.png](src/main/resources/com/fadlan/fireporter/ui.png)
+![fireporter-38.png](src/main/resources/com/fadlan/fireporter/fireporter-38.png)
 
 Fireporter is a third-party app for Firefly III, it uses Firefly's API to download your financial records and process it to a PDF file.
 
@@ -18,9 +18,9 @@ Fireporter is a third-party app for Firefly III, it uses Firefly's API to downlo
 
 ## TODO
 
-1. Build to executable for distribution
-2. Toggle attachments
-3. Multi-currency support (Major Update)
+- [ ] Build to executable for distribution
+- [x] Toggle attachments
+- [ ] Multi-currency support (Major Update)
 
 ## Important Notes
 - Currently, supports only Indonesian Rupiah (IDR). Multi-currency support is planned.

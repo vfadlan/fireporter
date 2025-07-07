@@ -19,6 +19,7 @@
 	<parameter name="EXPENSE_INSIGHT" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="TRANSACTION_REPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="TRANSACTION_HISTORY_DATASET" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<parameter name="WITH_ATTACHMENT" class="java.lang.Boolean"/>
 	<parameter name="ATTACHMENT_REPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="ATTACHMENT_DATASET" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="DISCLAIMER_REPORT" class="net.sf.jasperreports.engine.JasperReport"/>
@@ -112,9 +113,13 @@
 				<parameter name="DATE_RANGE">
 					<expression><![CDATA[$P{DATE_RANGE}]]></expression>
 				</parameter>
+				<parameter name="WITH_ATTACHMENT">
+					<expression><![CDATA[$P{WITH_ATTACHMENT}]]></expression>
+				</parameter>
 			</component>
 		</part>
 		<part uuid="c603efef-69ac-4c09-25b0-9225b693d9f8">
+			<printWhenExpression><![CDATA[$P{WITH_ATTACHMENT}]]></printWhenExpression>
 			<component kind="subreportPart">
 				<expression><![CDATA[$P{ATTACHMENT_REPORT}]]></expression>
 				<parameter name="ATTACHMENT_DATASET">

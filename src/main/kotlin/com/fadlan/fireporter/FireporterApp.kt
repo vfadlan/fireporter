@@ -141,7 +141,7 @@ class FireporterApp : Application() {
         val fxmlLoader = FXMLLoader(FireporterApp::class.java.getResource("fireporter.fxml"))
         fxmlLoader.setControllerFactory { clazz -> koin.get(clazz.kotlin) }
 
-        val scene = Scene(fxmlLoader.load(), 560.0, 580.0)
+        val scene = Scene(fxmlLoader.load(), 560.0, 625.0)
         val controller = fxmlLoader.getController<FireporterController>()
         controller.setStage(stage)
 
