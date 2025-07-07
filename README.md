@@ -19,7 +19,10 @@ Fireporter is a third-party app for Firefly III, it uses Firefly's API to downlo
 ## TODO
 
 - [ ] Build to executable for distribution
+- [ ] Github Action for building distributions
+- [ ] Budget
 - [x] <s>Toggle attachments</s>
+- [ ] Add Logging
 - [ ] Multi-currency support (Major Update)
 
 ## Important Notes
