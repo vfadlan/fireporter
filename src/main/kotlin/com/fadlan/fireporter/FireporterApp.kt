@@ -26,6 +26,11 @@ import org.koin.dsl.module
 
 class FireporterApp : Application() {
     companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            Application.launch(FireporterApp::class.java, *args)
+        }
+
         lateinit var koin: Koin
     }
 
@@ -135,6 +140,7 @@ class FireporterApp : Application() {
         }
         koin = koinApp.koin
     }
+
     override fun start(stage: Stage) {
         setUserAgentStylesheet(PrimerLight().userAgentStylesheet)
 
@@ -155,8 +161,4 @@ class FireporterApp : Application() {
 
         stage.show()
     }
-}
-
-fun main(args: Array<String>) {
-    Application.launch(FireporterApp::class.java, *args)
 }

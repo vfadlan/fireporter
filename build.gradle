@@ -2,13 +2,13 @@ plugins {
     id 'java'
     id 'application'
     id 'org.jetbrains.kotlin.jvm' version '2.1.0'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'org.beryx.jlink' version '2.25.0'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'com.dua3.gradle.runtime' version '1.13.1-patch-1'
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.0'
 }
 
 group = 'com.fadlan'
-version = '0.38.0'
+version = '0.39.0'
 
 repositories {
     mavenCentral()
@@ -24,7 +24,6 @@ tasks.withType(JavaCompile) {
 }
 
 application {
-//    mainModule = 'com.fadlan.fireporter'
     mainClass = 'com.fadlan.fireporter.FireporterApp'
     applicationDefaultJvmArgs = [
             '--add-opens=java.base/java.lang=ALL-UNNAMED',
@@ -32,20 +31,22 @@ application {
             '--add-opens=java.base/java.util=ALL-UNNAMED',
             "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
-            "--add-opens=javafx.controls/com.sun.javafx.scene.control.skin=ALL-UNNAMED",
-            "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
-            "--add-opens=javafx.controls/com.sun.javafx.scene.control.skin=ALL-UNNAMED",
-            "--add-opens=javafx.fxml/javafx.fxml=ALL-UNNAMED",
     ]
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 javafx {
-    version = '22-ea+11'
-    modules = ['javafx.controls', 'javafx.fxml']
+    version = '22'
+    modules = [
+            'javafx.base',
+            'javafx.controls',
+            'javafx.fxml',
+            'javafx.graphics',
+            'javafx.media'
+    ]
 }
 
 dependencies {
@@ -91,8 +92,11 @@ dependencies {
     implementation("net.sf.jasperreports:jasperreports-groovy:7.0.2")
 
     implementation("com.github.librepdf:openpdf:2.0.5")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.19.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.19.0")
+
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.17.1")
 
     runtimeOnly("io.projectreactor.tools:blockhound:1.0.8.RELEASE")
 }
@@ -102,7 +106,7 @@ configurations.configureEach {
     exclude group: 'xml-apis', module: 'xml-apis'
     exclude group: "org.springframework", module: "spring-jcl"
     resolutionStrategy.eachDependency {
-        if (requested.group.equals("org.codehaus.groovy")) {
+        if (requested.group == "org.codehaus.groovy") {
             useTarget("org.apache.groovy:${requested.name}:${requested.version}")
             because("Avoid conflicts between org.codehaus.groovy and org.apache.groovy")
         }
@@ -138,14 +142,117 @@ processResources {
     }
 }
 
-jlink {
-    imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
-    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+runtime {
     launcher {
-        name = 'app'
+        noConsole = true
+    }
+    options = [
+            '--compress', '2', '--no-header-files', '--no-man-pages',
+    ]
+    modules = [
+            'java.base',
+            'java.desktop',
+            'jdk.unsupported',
+            'java.logging',
+            'java.xml',
+            'java.sql',
+            'javafx.base',
+            'javafx.controls',
+            'javafx.fxml',
+            'javafx.graphics',
+            'javafx.media'
+    ]
+    additive = true
+
+    targetPlatform("linux") {
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-x64_bin.tar.gz")
+    }
+
+    targetPlatform("linux-aarch64") {
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-aarch64_bin.tar.gz")
+    }
+
+    targetPlatform("mac") { //arm
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_macos-x64_bin.tar.gz") {
+            downloadDir = "$buildDir/myMac"
+            archiveName = "my-mac-jdk"
+            archiveExtension = "tar.gz"
+            pathToHome = "jdk-15.0.2+7/Contents/Home"
+            overwrite = true
+        }
+    }
+
+    targetPlatform("mac-aarch64") { //arm
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_macos-aarch64_bin.tar.gz") {
+            downloadDir = "$buildDir/myMac"
+            archiveName = "my-mac-jdk"
+            archiveExtension = "tar.gz"
+            pathToHome = "jdk-15.0.2+7/Contents/Home"
+            overwrite = true
+        }
+    }
+
+    targetPlatform("win") {
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_windows-x64_bin.zip")
+//        jdkHome = jdkDownload("http://localhost/java-21/jdk-21.0.6_windows-x64_bin.zip")
+    }
+
+    jpackage {
+        targetPlatformName = "win"
+        imageOptions = [
+                '--name', "Fireporter",
+        ]
+        installerOptions = [
+                '--vendor', 'Fadlan Abduh',
+        ]
+        appVersion = project.version
+        resourceDir = file("src/main/resources") as File
+
+        def currentOs = org.gradle.internal.os.OperatingSystem.current()
+
+        def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
+        imageOptions += ['--icon', "src/main/resources/icons/fireporter.$imgType"]
+
+        if(currentOs.windows) {
+            targetPlatformName = "win"
+            installerType = 'msi'
+            installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
+        } else if (currentOs.linux) {
+            targetPlatformName = "linux"
+            installerOptions += ['--linux-package-name', 'fireporter', '--linux-shortcut']
+        } else if (currentOs.macOsX) {
+            targetPlatformName = "mac"
+            installerOptions += ['iimac-package-name', 'fireporter']
+        }
+
+        installerName = "Fireporter-${project.version}_$targetPlatformName"
     }
 }
 
-jlinkZip {
-    group = 'distribution'
+tasks.register('zipImage', Zip) {
+    dependsOn jpackageImage
+
+    def currentOs = org.gradle.internal.os.OperatingSystem.current()
+    def targetPlatformName = ""
+    if(currentOs.windows) targetPlatformName = "win"
+    else if (currentOs.linux) targetPlatformName = "linux"
+    else if (currentOs.macOsX) targetPlatformName = "mac"
+
+    from("$buildDir/jpackage/Fireporter")
+    destinationDirectory.set(file("$buildDir/jpackage"))
+    archiveBaseName.set("fireporter-${project.version}_$targetPlatformName-portable")
+    archiveExtension.set("zip")
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.fadlan.fireporter.FireporterApp',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor': 'Fadlan Abduh'
+        )
+    }
+    from sourceSets.main.output
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }

@@ -7,7 +7,6 @@ Fireporter is a third-party app for Firefly III, it uses Firefly's API to downlo
 ## Requirements
 - Firefly III version 6.x.x
 - Personal Access Token (PAT)
-- Java version 17 or higher
 
 ## Usage
 
@@ -18,16 +17,16 @@ Fireporter is a third-party app for Firefly III, it uses Firefly's API to downlo
 
 ## TODO
 
-- [ ] Build to executable for distribution
 - [ ] Github Action for building distributions
 - [ ] Budget
-- [x] <s>Toggle attachments</s>
 - [ ] Add Logging
 - [ ] Multi-currency support (Major Update)
+- [x] <s>Toggle attachments</s>
+- [x] <s>Build to executable for distribution</s>
 
 ## Important Notes
 - Currently, supports only Indonesian Rupiah (IDR). Multi-currency support is planned.
-- Tested only on Windows 10. Should work on Linux and macOS, but compatibility isn't guaranteed.
+- Release only available for Windows 10, others will be added.
 - Fireporter only reads data from Firefly III via API and formats it into a PDF.
 
 ## Disclaimer
@@ -35,3 +34,11 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 
 ## License
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
+
+## Changelog
+### 0.39.0
+- Update java version 17 to java 21
+- Update gradle version 8.2 to 8.10
+- Change packaging plugin from org.beryx.jlink to com.dua3.gradle.runtime
+- Write (working) packaging task for windows with `badass-runtime`
+- Write untested packaging task for macos and linux
