@@ -18,12 +18,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.slf4j.Logger
 import java.awt.Color
 import java.time.YearMonth
 
 class FireporterController(
     private val viewModel: FireporterViewModel,
-    private val progressTracker: FxProgressTracker
+    private val progressTracker: FxProgressTracker,
+    private val logger: Logger
 ) {
     private val controllerScope = CoroutineScope(Dispatchers.Main)
     private var job: Job? = null
@@ -54,6 +56,7 @@ class FireporterController(
 
         hostTextField.text = "localhost:777"
         versionLabel.text = "v$version"
+        logger.info("JavaFX controller initiated.")
     }
 
     private var x: Double = 0.0
@@ -96,6 +99,7 @@ class FireporterController(
         val result = alert.showAndWait()
         if (result.isPresent && result.get() == ButtonType.YES) {
             stage.close()
+            logger.info("Application stopped.")
         }
     }
 
@@ -251,6 +255,7 @@ class FireporterController(
 
     @FXML
     private fun generateBtnOnAction() {
+        logger.info("Generating PDF for period ${periodComboBox.selectionModel.selectedItem} ${yearComboBox.selectionModel.selectedItem}...")
         val host = hostProtocolComboBox.selectionModel.selectedItemProperty().value + hostTextField.text
         val token = tokenTextArea.text
 
@@ -292,6 +297,7 @@ class FireporterController(
                 "Process Canceled",
                 "You can close this pop-up"
             ).showAndWait()
+            logger.info("PDF Generation process cancelled.")
         }
     }
 

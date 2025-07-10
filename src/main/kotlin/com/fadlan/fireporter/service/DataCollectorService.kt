@@ -12,6 +12,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import org.slf4j.Logger
 import java.math.BigDecimal
 import kotlin.collections.LinkedHashMap
 
@@ -25,6 +26,7 @@ class DataCollectorService(
     private val attachmentService: AttachmentService,
     private val ktor: HttpClient,
     private val cred: CredentialProvider,
+    private val logger: Logger
 ) {
     private var currencyCode: String? = null
     private var currencySymbol: String? = null
@@ -40,26 +42,35 @@ class DataCollectorService(
     private lateinit var apiSysInfo: SystemInfoResponse
 
     private suspend fun collectData(dateRange: DateRangeBoundaries, withAttachment: Boolean) {
+        logger.info("Collecting accounts and charts data...")
         progressTracker.report("Collecting accounts and charts data")
         accounts = accountRepository.getAccountStatistics(dateRange)
         if (!accountRepository.hasActiveAccountInRange(dateRange, accounts)) throw InactiveAccountException()
         chart = chartRepository.getMergedChart(dateRange)
 
+        logger.info("Collecting general overview data...")
         progressTracker.report("Collecting general overview data")
         generalOverview = summaryRepository.getOverview(dateRange)
 
+        logger.info("Collecting income insight...")
         progressTracker.report("Collecting income insight")
         incomeInsight = insightRepository.getInsights(InsightType.INCOME, dateRange)
 
+        logger.info("Collecting expense insight...")
         progressTracker.report("Collecting expense insight")
         expenseInsight = insightRepository.getInsights(InsightType.EXPENSE, dateRange)
 
+        logger.info("Collecting transactions data...")
         progressTracker.report("Collecting transactions data")
         transactionJournals = transactionRepository.getTransactionJournals(dateRange, generalOverview)
 
+        logger.info("Data collected successfully.")
+
         progressTracker.report("Downloading attachments")
-        downloadedAttachments = if (withAttachment) attachmentService.downloadAttachments(transactionJournals.filter { it.hasAttachments })
-                                else mutableListOf()
+        downloadedAttachments = if (withAttachment) {
+            logger.info("Downloading attachments...")
+            attachmentService.downloadAttachments(transactionJournals.filter { it.hasAttachments })
+        } else mutableListOf()
 
         apiSysInfo = requestApiInfo(cred.host, cred.token).body()
     }

@@ -10,6 +10,7 @@ import net.sf.jasperreports.engine.*
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource
 import net.sf.jasperreports.engine.type.WhenNoDataTypeEnum
 import net.sf.jasperreports.engine.xml.JRXmlLoader
+import org.slf4j.Logger
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
@@ -20,7 +21,9 @@ import java.util.Date
 import javax.imageio.ImageIO
 import kotlin.collections.HashMap
 
-class JasperReportService {
+class JasperReportService(
+    private val logger: Logger
+) {
     private val compiledReports = mutableMapOf<String, JasperReport>()
 
     private val jrxmlFiles = listOf(
@@ -35,6 +38,7 @@ class JasperReportService {
     init {
         System.setProperty("net.sf.jasperreports.compiler.class", "net.sf.jasperreports.compilers.JRGroovyCompiler")
 
+        logger.info("Compiling jasper .jrxml files...")
         for (jrxmlName in jrxmlFiles) {
             val resourcePath = "/com/fadlan/fireporter/jasper/$jrxmlName"
             val stream = FireporterApp::class.java.getResourceAsStream(resourcePath)
@@ -47,9 +51,11 @@ class JasperReportService {
                 val reportKey = jrxmlName.removeSuffix(".jrxml")
                 compiledReports[reportKey] = report
             } catch (e: JRException) {
+                logger.error("Failed to compile $jrxmlName: ${e.message}")
                 throw IllegalStateException("Failed to compile: $jrxmlName: ${e.message}", e)
             }
         }
+        logger.info("${compiledReports.size} of ${jrxmlFiles.size} .jrxml files compiled successfully.")
     }
 
     private fun loadCompiledReport(name: String): JasperReport {

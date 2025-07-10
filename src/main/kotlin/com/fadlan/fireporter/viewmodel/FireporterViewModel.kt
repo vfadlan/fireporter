@@ -20,6 +20,7 @@ import javafx.scene.control.CheckBox
 import javafx.scene.control.ComboBox
 import javafx.stage.FileChooser
 import javafx.stage.Window
+import org.slf4j.Logger
 import java.io.File
 
 class FireporterViewModel(
@@ -28,7 +29,8 @@ class FireporterViewModel(
         private val progressTracker: FxProgressTracker,
         private val dateRangeResolver: DateRangeResolver,
         private val dataCollectorService: DataCollectorService,
-        private val jasperReportService: JasperReportService
+        private val jasperReportService: JasperReportService,
+        private val logger: Logger
     ) {
     init {
         progressTracker.totalSteps = 8
@@ -37,7 +39,10 @@ class FireporterViewModel(
     suspend fun generate(host: String, token: String, periodComboBox: ComboBox<String>, yearComboBox: ComboBox<Int>, theme: Theme, includeAttachmentCheckBox: CheckBox) {
         cred.host = host
         cred.token = token
-        if (!testConnection(host, token)) return
+        if (!testConnection(host, token)) {
+            logger.error("Connection test failed. Process cancelled.")
+            return
+        }
 
         val period = periodComboBox.selectionModel.selectedItem
         val year = yearComboBox.selectionModel.selectedItem
@@ -59,7 +64,9 @@ class FireporterViewModel(
                 "Financial Report Generated",
                 "The financial report has been successfully exported as a PDF file."
             ).showAndWait()
+            logger.info("PDF Generated successfully.")
         } catch (exception: InactiveAccountException) {
+            logger.error("Account inactive at period $period $year.")
             progressTracker.sendMessage(exception.message)
             progressTracker.resetProgress()
 
@@ -70,6 +77,7 @@ class FireporterViewModel(
                 "You were inactive at $period $year"
             ).showAndWait()
         } catch (exception: IllegalDateRangeException) {
+            logger.error("Invalid date given.")
             progressTracker.sendMessage(exception.message)
             progressTracker.resetProgress()
 
@@ -80,8 +88,9 @@ class FireporterViewModel(
                 "Try again tomorrow."
             ).showAndWait()
         } catch (exception: IllegalStateException) {
+            logger.error("Process cancelled.")
             if (exception.message == "StandaloneCoroutine was cancelled") {
-                progressTracker.sendMessage("Process canceled.")
+                progressTracker.sendMessage("Process cancelled.")
                 progressTracker.resetProgress()
 
                 IconizedAlert(
@@ -91,6 +100,7 @@ class FireporterViewModel(
                     "You can close this pop-up."
                 ).showAndWait()
             } else {
+                logger.error("Unknown exception: ${exception.message}")
                 progressTracker.sendMessage("An unknown error occur.")
                 progressTracker.resetProgress()
 
@@ -105,7 +115,9 @@ class FireporterViewModel(
     }
 
     suspend fun testConnection(host: String, token: String): Boolean {
+        logger.info("Testing connection")
         if (host.isBlank() || token.isBlank()) {
+            logger.warn("Incomplete field: host address and access token.")
             IconizedAlert(
                 Alert.AlertType.WARNING,
                 "Incomplete Data",
@@ -120,6 +132,7 @@ class FireporterViewModel(
             val sysInfo: SystemInfoResponse? = try { apiInfo.body<SystemInfoResponse>() } catch (e: Exception) { null }
 
             if (apiInfo.status == HttpStatusCode.Unauthorized) {
+                logger.error("Unauthorized: invalid Firefly III Personal Access Token.")
                 IconizedAlert(
                     Alert.AlertType.ERROR,
                     "Unauthorized",
@@ -127,6 +140,7 @@ class FireporterViewModel(
                     "Enter a valid Firefly III Personal Access Token"
                 ).showAndWait()
             } else if (sysInfo !is SystemInfoResponse) { // If response structure is not as expected
+                logger.error("Invalid address: given host is not a valid Firefly III installation.")
                 IconizedAlert(
                     Alert.AlertType.ERROR,
                     "Invalid Address",
@@ -134,21 +148,24 @@ class FireporterViewModel(
                     "The given host is not a valid Firefly III installation."
                 ).showAndWait()
             } else {
+                logger.info("Connection tested successfully.")
                 return true
             }
         } catch (exception: ServerResponseException) {
+            logger.error("Internal Server Error: ${exception.message}")
             IconizedAlert(
                 Alert.AlertType.ERROR,
                 "Error",
                 "Internal Server Error",
-                "exception.message"
+                exception.message
             ).showAndWait()
         } catch (exception: Exception) {
+            logger.error("Unknown exception: ${exception.message}")
             IconizedAlert(
                 Alert.AlertType.ERROR,
                 "Unknown Error",
                 "Unknown Error",
-                "An unknown error occured: ${exception.message}"
+                "An unknown error occurred: ${exception.message}"
             ).showAndWait()
         }
         return false

@@ -22,9 +22,16 @@ import javafx.stage.Stage
 import javafx.stage.StageStyle
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
+import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import kotlin.reflect.KClass
 
 class FireporterApp : Application() {
+    private val logger = LoggerFactory.getLogger(FireporterApp::class.java)
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
@@ -34,9 +41,18 @@ class FireporterApp : Application() {
         lateinit var koin: Koin
     }
 
+    private fun <T : Any> classLoggerModule(clazz: KClass<T>): Module = module {
+        factory(named(clazz.qualifiedName!!)) {
+            LoggerFactory.getLogger(clazz.java)
+        }
+    }
+
+    private inline fun <reified T : Any> classLoggerModule(): Module = classLoggerModule(T::class)
+
     override fun init() {
         super.init()
 
+        logger.info("Initiating app modules...")
         val appModule = module {
             single<HttpClient> { Ktor.client }
             single<DateRangeResolver> { DateRangeResolver }
@@ -46,17 +62,6 @@ class FireporterApp : Application() {
                 FxProgressTracker()
             }
 
-            single {
-                JasperReportService()
-            }
-
-            single {
-                AttachmentService(
-                    get<FxProgressTracker>(),
-                    get<HttpClient>(),
-                    get<CredentialProvider>(),
-                )
-            }
 
             single {
                 AttachmentRepository(
@@ -102,7 +107,25 @@ class FireporterApp : Application() {
                 )
             }
 
-            factory {
+            includes(classLoggerModule<JasperReportService>())
+            single {
+                JasperReportService(
+                    get(named(JasperReportService::class.qualifiedName!!))
+                )
+            }
+
+            includes(classLoggerModule<AttachmentService>())
+            single {
+                AttachmentService(
+                    get<FxProgressTracker>(),
+                    get<HttpClient>(),
+                    get<CredentialProvider>(),
+                    get(named(AttachmentService::class.qualifiedName!!))
+                )
+            }
+
+            includes(classLoggerModule<DataCollectorService>())
+            single {
                 DataCollectorService(
                     get<FxProgressTracker>(),
                     get<AccountRepository>(),
@@ -112,25 +135,30 @@ class FireporterApp : Application() {
                     get<TransactionRepository>(),
                     get<AttachmentService>(),
                     get<HttpClient>(),
-                    get<CredentialProvider>()
+                    get<CredentialProvider>(),
+                    get(named(DataCollectorService::class.qualifiedName!!))
                 )
             }
 
-            factory {
+            includes(classLoggerModule<FireporterViewModel>())
+            single {
                 FireporterViewModel(
                     get<HttpClient>(),
                     get<CredentialProvider>(),
                     get<FxProgressTracker>(),
                     get<DateRangeResolver>(),
                     get<DataCollectorService>(),
-                    get<JasperReportService>()
+                    get<JasperReportService>(),
+                    get(named(FireporterViewModel::class.qualifiedName!!))
                 )
             }
 
-            factory {
+            includes(classLoggerModule<FireporterController>())
+            single {
                 FireporterController(
                     get<FireporterViewModel>(),
-                    get<FxProgressTracker>()
+                    get<FxProgressTracker>(),
+                    get(named(FireporterController::class.qualifiedName!!))
                 )
             }
         }
@@ -142,6 +170,7 @@ class FireporterApp : Application() {
     }
 
     override fun start(stage: Stage) {
+        logger.info("Loading JavaFX stage")
         setUserAgentStylesheet(PrimerLight().userAgentStylesheet)
 
         val fxmlLoader = FXMLLoader(FireporterApp::class.java.getResource("fireporter.fxml"))

@@ -9,12 +9,14 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.apache.pdfbox.tools.imageio.ImageIOUtil
+import org.slf4j.Logger
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
@@ -26,6 +28,7 @@ class AttachmentService(
     private val progressTracker: FxProgressTracker,
     private val ktor: HttpClient,
     private val cred: CredentialProvider,
+    private val logger: Logger
 ) {
     private val tempDir: Path = Files.createTempDirectory("fireporter-attachments-")
         .apply { toFile().deleteOnExit() }
@@ -78,27 +81,33 @@ class AttachmentService(
                     withContext(Dispatchers.Main) {
                         progressTracker.sendMessage("Downloading attachments (${currentJournal+1}/${transactionJournals.size}): ${attachment.filename}")
                     }
+                    try {
+                        val file = downloadFile(attachment.downloadUrl, attachment.filename)
+                        attachment.file = file
 
-                    val file = downloadFile(attachment.downloadUrl, attachment.filename)
-                    attachment.file = file
-
-                    attachment.imageFiles = if (attachment.mime.startsWith("image/")) {
-                        mutableListOf(
-                            AttachmentImage(
-                                withContext(Dispatchers.IO) { ImageIO.read(file)}
+                        attachment.imageFiles = if (attachment.mime.startsWith("image/")) {
+                            mutableListOf(
+                                AttachmentImage(
+                                    withContext(Dispatchers.IO) { ImageIO.read(file) }
+                                )
                             )
-                        )
-                    } else if (attachment.mime == "application/pdf") {
-                        pdf2Img(file).map {
-                            AttachmentImage(it)
+                        } else if (attachment.mime == "application/pdf") {
+                            pdf2Img(file).map {
+                                AttachmentImage(it)
+                            }
+                        } else {
+                            mutableListOf()
                         }
-                    } else {
-                        mutableListOf()
-                    }
 
-                    downloadedAttachments += attachment
+                        downloadedAttachments += attachment
+                    } catch (exception: TimeoutCancellationException) {
+                        logger.error("Timeout Exception: ${exception.message}")
+                    } catch (exception: Exception) {
+                        logger.error("Unknown exception: ${exception.message}")
+                    }
                 }
             }
+            logger.info("${downloadedAttachments.size} attachments downloaded successfully.")
 
             downloadedAttachments
         }
