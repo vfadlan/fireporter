@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import org.apache.pdfbox.Loader
-import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.rendering.ImageType
 import org.apache.pdfbox.rendering.PDFRenderer
 import org.apache.pdfbox.tools.imageio.ImageIOUtil
@@ -21,6 +20,8 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import javax.imageio.ImageIO
 
 
@@ -30,46 +31,58 @@ class AttachmentService(
     private val cred: CredentialProvider,
     private val logger: Logger
 ) {
-    private val tempDir: Path = Files.createTempDirectory("fireporter-attachments-")
-        .apply { toFile().deleteOnExit() }
+    private val tempDir: Path = Paths.get(".", "temp", "attachments")
+        .toAbsolutePath()
+        .normalize()
+        .also { Files.createDirectories(it) }
 
-    private suspend fun downloadFile(url: String, filename: String): File {
-        val response: HttpResponse = ktor.get(url) {
-            headers.append("Authorization", "Bearer ${cred.token}")
+    private suspend fun downloadFile(url: String, attachment: Attachment): File {
+        val safeFilename = "att_${attachment.id}-${attachment.filename.replace(Regex("[^\\w.-]"), "_")}"
+        val tempPath = tempDir.resolve(safeFilename)
+
+        if (!Files.exists(tempPath)) {
+            val response: HttpResponse = ktor.get(url) {
+                headers.append("Authorization", "Bearer ${cred.token}")
+            }
+
+            withContext(Dispatchers.IO) {
+                Files.write(tempPath, response.readRawBytes(), StandardOpenOption.CREATE)
+            }
+            logger.debug("File $safeFilename downloaded successfully.")
+        } else {
+            logger.debug("File $safeFilename already exists, skipping download.")
         }
 
-        val tempFile: Path = withContext(Dispatchers.IO) {
-            val createdFile = Files.createTempFile(tempDir, "att-", filename)
-            createdFile.toFile().deleteOnExit()
-            createdFile
-        }
-
-        response.readRawBytes().also { bytes ->
-            Files.write(tempFile, bytes)
-        }
-
-        return tempFile.toFile()
+        return tempPath.toFile().apply { deleteOnExit() }
     }
 
     private suspend fun pdf2Img(file: File): MutableList<BufferedImage> = withContext(Dispatchers.Default) {
-        val outputFiles = mutableListOf<BufferedImage>()
-        val document: PDDocument = Loader.loadPDF(file)
-        val pdfRenderer = PDFRenderer(document)
-
+        val outputImages = mutableListOf<BufferedImage>()
+        val document = Loader.loadPDF(file)
+        val renderer = PDFRenderer(document)
         val baseName = file.nameWithoutExtension
-        val parentDir = file.parentFile ?: File(".")
 
         for (page in 0 until document.numberOfPages) {
-            val bim = pdfRenderer.renderImageWithDPI(page, 300f, ImageType.RGB)
-            val outFile = File(parentDir, "${baseName}-${page + 1}.png").apply { deleteOnExit() }
-            ImageIOUtil.writeImage(bim, outFile.absolutePath, 300)
-            outputFiles.add(withContext(Dispatchers.IO) {
-                ImageIO.read(outFile)
+            val safePageName = "${baseName}-pg_${page + 1}.png".replace(Regex("[^\\w.-]"), "_")
+            val pagePath = tempDir.resolve(safePageName)
+
+            if (!Files.exists(pagePath)) {
+                val image = renderer.renderImageWithDPI(page, 300f, ImageType.RGB)
+                ImageIOUtil.writeImage(image, pagePath.toAbsolutePath().toString(), 300)
+                logger.debug("Page image $safePageName generated successfully.")
+            } else {
+                logger.debug("Page image $safePageName already exists, skipping.")
+            }
+
+            val pageFile = pagePath.toFile().apply { deleteOnExit() }
+
+            outputImages.add(withContext(Dispatchers.IO) {
+                ImageIO.read(pageFile)
             })
         }
 
         document.close()
-        outputFiles
+        outputImages
     }
 
     suspend fun downloadAttachments(transactionJournals: List<TransactionJournal>): MutableList<Attachment> =
@@ -82,7 +95,7 @@ class AttachmentService(
                         progressTracker.sendMessage("Downloading attachments (${currentJournal+1}/${transactionJournals.size}): ${attachment.filename}")
                     }
                     try {
-                        val file = downloadFile(attachment.downloadUrl, attachment.filename)
+                        val file = downloadFile(attachment.downloadUrl, attachment)
                         attachment.file = file
 
                         attachment.imageFiles = if (attachment.mime.startsWith("image/")) {

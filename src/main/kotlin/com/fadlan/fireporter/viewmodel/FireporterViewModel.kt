@@ -148,7 +148,7 @@ class FireporterViewModel(
                     "The given host is not a valid Firefly III installation."
                 ).showAndWait()
             } else {
-                logger.info("Connection tested successfully.")
+                logger.debug("Connection tested successfully.")
                 return true
             }
         } catch (exception: ServerResponseException) {

@@ -195,7 +195,7 @@ runtime {
         jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_windows-x64_bin.zip") {
             archiveName = "windows-x64-jdk21"
         }
-//        jdkHome = jdkDownload("http://localhost/java-21/jdk-21.0.6_windows-x64_bin.zip") {
+//        jdkHome = jdkDownload("http://localhost/java-21/jdk-javafx-21-bundle_windows-x64_bin.zip") {
 //            archiveName = "windows-x64-jdk21"
 //        }
     }
