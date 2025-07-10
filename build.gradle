@@ -165,39 +165,42 @@ runtime {
     additive = true
 
     targetPlatform("linux") {
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-x64_bin.tar.gz")
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-x64_bin.tar.gz") {
+            archiveName = "linux-x64-jdk21"
+        }
     }
 
-    targetPlatform("linux-aarch64") {
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-aarch64_bin.tar.gz")
+    targetPlatform("linux-aarch64") { //arm
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-aarch64_bin.tar.gz") {
+            archiveName = "linux-aarch64-jdk21"
+        }
     }
 
-    targetPlatform("mac") { //arm
+    targetPlatform("mac") {
         jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_macos-x64_bin.tar.gz") {
-            downloadDir = "$buildDir/myMac"
-            archiveName = "my-mac-jdk"
-            archiveExtension = "tar.gz"
-            pathToHome = "jdk-15.0.2+7/Contents/Home"
-            overwrite = true
+            archiveName = "mac-x64-jdk21"
         }
     }
 
     targetPlatform("mac-aarch64") { //arm
         jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_macos-aarch64_bin.tar.gz") {
-            downloadDir = "$buildDir/myMac"
-            archiveName = "my-mac-jdk"
-            archiveExtension = "tar.gz"
-            pathToHome = "jdk-15.0.2+7/Contents/Home"
-            overwrite = true
+            archiveName = "mac-aarch64-jdk21"
         }
     }
 
     targetPlatform("win") {
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_windows-x64_bin.zip")
-//        jdkHome = jdkDownload("http://localhost/java-21/jdk-21.0.6_windows-x64_bin.zip")
+        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_windows-x64_bin.zip") {
+            archiveName = "windows-x64-jdk21"
+        }
+//        jdkHome = jdkDownload("http://localhost/java-21/jdk-21.0.6_windows-x64_bin.zip") {
+//            archiveName = "windows-x64-jdk21"
+//        }
     }
 
     jpackage {
+        imageOutputDir = file("$buildDir/distributions/image") as File
+        installerOutputDir = file("$buildDir/distributions/installer") as File
+
         targetPlatformName = "win"
         imageOptions = [
                 '--name', "Fireporter",
@@ -215,17 +218,20 @@ runtime {
 
         if(currentOs.windows) {
             targetPlatformName = "win"
-            installerType = 'msi'
+            installerType = "msi"
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
         } else if (currentOs.linux) {
             targetPlatformName = "linux"
+            installerType = "deb"
             installerOptions += ['--linux-package-name', 'fireporter', '--linux-shortcut']
         } else if (currentOs.macOsX) {
             targetPlatformName = "mac"
-            installerOptions += ['iimac-package-name', 'fireporter']
+            installerType = "dmg"
+            installerOptions += ['--mac-package-name', 'fireporter']
         }
 
-        installerName = "Fireporter-${project.version}_$targetPlatformName"
+        def arch = System.getProperty("os.arch")
+        installerName = "Fireporter_$targetPlatformName-${arch}_v"
     }
 }
 
@@ -238,9 +244,11 @@ tasks.register('zipImage', Zip) {
     else if (currentOs.linux) targetPlatformName = "linux"
     else if (currentOs.macOsX) targetPlatformName = "mac"
 
-    from("$buildDir/jpackage/Fireporter")
-    destinationDirectory.set(file("$buildDir/jpackage"))
-    archiveBaseName.set("fireporter-${project.version}_$targetPlatformName-portable")
+    def arch = System.getProperty("os.arch")
+
+    from("$buildDir/distributions/image/Fireporter")
+    destinationDirectory.set(file("$buildDir/distributions/image"))
+    archiveBaseName.set("fireporter_$targetPlatformName-$arch-portable_v")
     archiveExtension.set("zip")
 }
 
