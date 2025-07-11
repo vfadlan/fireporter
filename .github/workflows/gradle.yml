@@ -1,0 +1,79 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'gradle'
+
+      - name: Grant execute permissions (Unix)
+        if: runner.os != 'Windows'
+        run: chmod +x gradlew
+
+      - name: Build project
+        run: ./gradlew build runtime --no-daemon
+        shell: bash
+
+      - name: Package project
+        run: ./gradlew jpackage --no-daemon
+        shell: bash
+
+      - name: Compress app image
+        run: ./gradlew packImage --no-daemon
+        shell: bash
+
+      - name: Archive outputs
+        run: |
+          mkdir -p upload
+          cp -r build/distributions/image/*.zip upload/ 2>/dev/null || true
+          cp -r build/distributions/image/*.tar.gz upload/ 2>/dev/null || true
+          cp -r build/distributions/installer/* upload/ 2>/dev/null || true
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-artifacts
+          path: upload/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: Flatten artifacts
+        run: |
+          mkdir upload
+          find all-artifacts -type f -exec cp {} upload/ \;
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: upload/*

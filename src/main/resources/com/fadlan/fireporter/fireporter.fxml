@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="560.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fadlan.fireporter.controller.FireporterController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="560.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21.0.7" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fadlan.fireporter.controller.FireporterController">
    <children>
       <VBox fx:id="vBoxBase" onMouseDragged="#onMouseDragged" onMousePressed="#onMousePressed" prefHeight="600.0" prefWidth="536.0" style="-fx-background-color: white; -fx-background-radius: 12px;">
          <children>

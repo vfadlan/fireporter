@@ -4,9 +4,12 @@
 
 Fireporter is a third-party app for Firefly III, it uses Firefly's API to download your financial records and process it to a PDF file.
 
-## 🚀 Releases
+## 🚀 Installation
 
-Download the latest version here: [Fireporter Latest Version](https://github.com/vFadlan011/fireporter/releases/latest)
+Download the latest Fireporter version here: [Fireporter Latest Version](https://github.com/vFadlan011/fireporter/releases/latest)
+
+### MacOs ARM (M1, M2, etc.) (Build from Source)
+Fireporter currently does not offer pre-built binaries for MacOS ARM architecture. You must build the application from the source code. [Guide on building Fireporter binaries](build.md)
 
 ## 📋 Requirements
 - Firefly III version 6.x.x
@@ -21,12 +24,13 @@ Download the latest version here: [Fireporter Latest Version](https://github.com
 
 ## ✅ TODO
 
-- [ ] Github Action for building distributions
+
 - [ ] Budget
-- [ ] Add Logging
 - [ ] Multi-currency support (Major Update)
 - [x] <s>Toggle attachments</s>
+- [x] <s>Add Logging</s>
 - [x] <s>Build to executable for distribution</s>
+- [x] <s>Github Action for building distributions</s>
 
 ## ⚠️ Important Notes
 - Currently, supports only Indonesian Rupiah (IDR). Multi-currency support is planned.
@@ -40,7 +44,12 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
-### 0.39.0
+### 1.0.0 - 2025/07/11
+- New: Added a GitHub Action for building and releasing distributions.
+- Changed: Switched the jdkDownload source to a custom JDK and JavaFX bundle.
+- Changed: Jumped the major version to 1 to ensure compatibility with macOS.
+
+### 0.39.0 - 2025/07/09
 - Update java version 17 to java 21
 - Update gradle version 8.2 to 8.10
 - Change packaging plugin from org.beryx.jlink to com.dua3.gradle.runtime

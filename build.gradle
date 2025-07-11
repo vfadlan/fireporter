@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '0.40.0'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -39,7 +39,7 @@ kotlin {
 }
 
 javafx {
-    version = '22'
+    version = '21.0.7'
     modules = [
             'javafx.base',
             'javafx.controls',
@@ -167,44 +167,34 @@ runtime {
     ]
     additive = true
 
-    targetPlatform("linux") {
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-x64_bin.tar.gz") {
+    targetPlatform("linux") { // linux x64
+        jdkHome = jdkDownload("https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-linux_x64.tar.gz") {
             archiveName = "linux-x64-jdk21"
         }
     }
 
-    targetPlatform("linux-aarch64") { //arm
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_linux-aarch64_bin.tar.gz") {
-            archiveName = "linux-aarch64-jdk21"
-        }
-    }
-
-    targetPlatform("mac") {
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_macos-x64_bin.tar.gz") {
+    targetPlatform("mac") { // mac x64
+        jdkHome = jdkDownload("https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-macos_x64.tar.gz") {
             archiveName = "mac-x64-jdk21"
         }
     }
 
-    targetPlatform("mac-aarch64") { //arm
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_macos-aarch64_bin.tar.gz") {
+    targetPlatform("mac-aarch64") { // mac arm
+        jdkHome = jdkDownload("https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-macos_aarch64.tar.gz") {
             archiveName = "mac-aarch64-jdk21"
         }
     }
 
-    targetPlatform("win") {
-        jdkHome = jdkDownload("https://download.oracle.com/java/21/archive/jdk-21.0.6_windows-x64_bin.zip") {
+    targetPlatform("win") { // win x64
+        jdkHome = jdkDownload("https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-windows_x64.zip") {
             archiveName = "windows-x64-jdk21"
         }
-//        jdkHome = jdkDownload("http://localhost/java-21/jdk-javafx-21-bundle_windows-x64_bin.zip") {
-//            archiveName = "windows-x64-jdk21"
-//        }
     }
 
     jpackage {
         imageOutputDir = file("$buildDir/distributions/image") as File
         installerOutputDir = file("$buildDir/distributions/installer") as File
 
-        targetPlatformName = "win"
         imageOptions = [
                 '--name', "Fireporter",
         ]
@@ -238,21 +228,32 @@ runtime {
     }
 }
 
-tasks.register('zipImage', Zip) {
+tasks.register('packImage') {
     dependsOn jpackageImage
+    doLast {
+        def currentOs = org.gradle.internal.os.OperatingSystem.current()
+        def targetPlatformName = currentOs.windows ? "win" : currentOs.linux ? "linux" : "mac"
+        def arch = System.getProperty("os.arch")
+        def archiveExt = currentOs.windows ? "zip" : "tar.gz"
+        def archiveFileName = "passgen_${targetPlatformName}-${arch}-portable_v${project.version}.${archiveExt}"
 
-    def currentOs = org.gradle.internal.os.OperatingSystem.current()
-    def targetPlatformName = ""
-    if(currentOs.windows) targetPlatformName = "win"
-    else if (currentOs.linux) targetPlatformName = "linux"
-    else if (currentOs.macOsX) targetPlatformName = "mac"
+        def imageDir = file("$buildDir/distributions/image/Fireporter")
+        def outputDir = file("$buildDir/distributions/image")
+        outputDir.mkdirs()
 
-    def arch = System.getProperty("os.arch")
-
-    from("$buildDir/distributions/image/Fireporter")
-    destinationDirectory.set(file("$buildDir/distributions/image"))
-    archiveBaseName.set("fireporter_$targetPlatformName-$arch-portable_v")
-    archiveExtension.set("zip")
+        if (currentOs.windows) {
+            ant.zip(destfile: "${outputDir}/${archiveFileName}", basedir: imageDir)
+        } else if (currentOs.linux) {
+            ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
+                tarfileset(dir: imageDir)
+            }
+        } else if (currentOs.macOsX) {
+            imageDir = file("$buildDir/distributions/image/Fireporter.app")
+            ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
+                tarfileset(dir: imageDir)
+            }
+        }
+    }
 }
 
 jar {
