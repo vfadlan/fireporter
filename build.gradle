@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '1.0.0'
+version = '1.0.1'
 
 repositories {
     mavenCentral()
@@ -195,9 +195,7 @@ runtime {
         imageOutputDir = file("$buildDir/distributions/image") as File
         installerOutputDir = file("$buildDir/distributions/installer") as File
 
-        imageOptions = [
-                '--name', "Fireporter",
-        ]
+        imageName = "Fireporter"
         installerOptions = [
                 '--vendor', 'Fadlan Abduh',
         ]
@@ -216,6 +214,7 @@ runtime {
         } else if (currentOs.linux) {
             targetPlatformName = "linux"
             installerType = "deb"
+            imageName = "fireporter"
             installerOptions += ['--linux-package-name', 'fireporter', '--linux-shortcut']
         } else if (currentOs.macOsX) {
             targetPlatformName = "mac"
@@ -237,13 +236,14 @@ tasks.register('packImage') {
         def archiveExt = currentOs.windows ? "zip" : "tar.gz"
         def archiveFileName = "passgen_${targetPlatformName}-${arch}-portable_v${project.version}.${archiveExt}"
 
-        def imageDir = file("$buildDir/distributions/image/Fireporter")
         def outputDir = file("$buildDir/distributions/image")
         outputDir.mkdirs()
 
         if (currentOs.windows) {
+            def imageDir = file("$buildDir/distributions/image/Fireporter")
             ant.zip(destfile: "${outputDir}/${archiveFileName}", basedir: imageDir)
         } else if (currentOs.linux) {
+            def imageDir = file("$buildDir/distributions/image/fireporter")
             ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
                 tarfileset(dir: imageDir)
             }
