@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '1.0.1'
+version = '1.0.2'
 
 repositories {
     mavenCentral()
@@ -248,7 +248,7 @@ tasks.register('packImage') {
                 tarfileset(dir: imageDir)
             }
         } else if (currentOs.macOsX) {
-            imageDir = file("$buildDir/distributions/image/Fireporter.app")
+            def imageDir = file("$buildDir/distributions/image/Fireporter.app")
             ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
                 tarfileset(dir: imageDir)
             }
