@@ -14,25 +14,25 @@ Before building, ensure you have the following installed:
     * Find the `targetPlatform()` entries.
     * **Remove all `targetPlatform()` blocks except the one for your operating system.**
 
-    **Example (MacOS ARM):**
+    **Example (MacOS x64):**
 
     If your `build.gradle` looks like this:
 
     ```gradle
     // Before (all platforms)
     targetPlatform("linux") { ... }
-    targetPlatform("mac") { ... }
-    targetPlatform("mac-aarch64") { ... } // MacOS ARM
+    targetPlatform("mac") { ... } // MacOS x64
+    targetPlatform("mac-aarch64") { ... }
     targetPlatform("win") { ... }
     ```
 
-    Edit the file to keep only the `mac-aarch64` block:
+    Edit the file to keep only the `mac` block:
 
     ```gradle
-    // After (only MacOS ARM)
-    targetPlatform("mac-aarch64") { // mac arm
-        jdkHome = jdkDownload("[https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-macos_aarch64.tar.gz](https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-macos_aarch64.tar.gz)") {
-            archiveName = "mac-aarch64-jdk21"
+    // After (only MacOS x64)
+    targetPlatform("mac") { // mac x64
+        jdkHome = jdkDownload("https://is3.cloudhost.id/jdk-javafx-bundle/21/jdk21-macos_x64.tar.gz") {
+            archiveName = "mac-x64-jdk21"
         }
     }
     ```

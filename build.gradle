@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '1.0.2'
+version = '1.0.3'
 
 repositories {
     mavenCentral()
@@ -223,7 +223,7 @@ runtime {
         }
 
         def arch = System.getProperty("os.arch")
-        installerName = "Fireporter_$targetPlatformName-${arch}_v"
+        installerName = "fireporter_$targetPlatformName-${arch}_v"
     }
 }
 
@@ -234,7 +234,7 @@ tasks.register('packImage') {
         def targetPlatformName = currentOs.windows ? "win" : currentOs.linux ? "linux" : "mac"
         def arch = System.getProperty("os.arch")
         def archiveExt = currentOs.windows ? "zip" : "tar.gz"
-        def archiveFileName = "passgen_${targetPlatformName}-${arch}-portable_v${project.version}.${archiveExt}"
+        def archiveFileName = "fireporter_${targetPlatformName}-${arch}-portable_v-${project.version}.${archiveExt}"
 
         def outputDir = file("$buildDir/distributions/image")
         outputDir.mkdirs()

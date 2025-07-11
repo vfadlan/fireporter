@@ -8,8 +8,8 @@ Fireporter is a third-party app for Firefly III, it uses Firefly's API to downlo
 
 Download the latest Fireporter version here: [Fireporter Latest Version](https://github.com/vFadlan011/fireporter/releases/latest)
 
-### MacOs ARM (M1, M2, etc.) (Build from Source)
-Fireporter currently does not offer pre-built binaries for MacOS ARM architecture. You must build the application from the source code. [Guide on building Fireporter binaries](build.md)
+### MacOs x64 (Intel) (Build from Source)
+Fireporter does not offer pre-built binaries for MacOS old architecture. You must build the application from the source code. [Guide on building Fireporter binaries](build.md)
 
 ## 📋 Requirements
 - Firefly III version 6.x.x
@@ -23,7 +23,6 @@ Fireporter currently does not offer pre-built binaries for MacOS ARM architectur
 4. Click `Generate` to create the PDF.
 
 ## ✅ TODO
-
 
 - [ ] Budget
 - [ ] Multi-currency support (Major Update)
@@ -44,7 +43,7 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
-### 1.0.0 - 2025/07/11
+### 1.0.3 - 2025/07/11
 - New: Added a GitHub Action for building and releasing distributions.
 - Changed: Switched the jdkDownload source to a custom JDK and JavaFX bundle.
 - Changed: Jumped the major version to 1 to ensure compatibility with macOS.
