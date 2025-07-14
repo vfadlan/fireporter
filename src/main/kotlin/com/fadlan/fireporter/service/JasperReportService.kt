@@ -4,6 +4,7 @@ import com.fadlan.fireporter.FireporterApp
 import com.fadlan.fireporter.model.ChartEntry
 import com.fadlan.fireporter.model.ReportData
 import com.fadlan.fireporter.model.Theme
+import com.fadlan.fireporter.utils.getProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.sf.jasperreports.engine.*
@@ -161,11 +162,7 @@ fun HashMap<String, Any>.loadAttachments(data: ReportData, attachmentReport: Jas
 }
 
 fun HashMap<String, Any>.loadSysInfo(data: ReportData) {
-    val fireporterVersion: String = object {}.javaClass
-        .getResourceAsStream("/version.properties")
-        ?.use { stream ->
-            java.util.Properties().apply { load(stream) }
-        }?.getProperty("app.version") ?: "Unknown"
+    val fireporterVersion: String = getProperty("config/app.properties", "app.version")
 
     this["FIREPORTER_VERSION"] = fireporterVersion
     this["FIREFLY_VERSION"] = data.apiSysInfo.version

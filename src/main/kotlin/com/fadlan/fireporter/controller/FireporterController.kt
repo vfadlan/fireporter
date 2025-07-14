@@ -4,6 +4,7 @@ import com.fadlan.fireporter.FireporterApp
 import com.fadlan.fireporter.model.Theme
 import com.fadlan.fireporter.utils.FxProgressTracker
 import com.fadlan.fireporter.utils.IconizedAlert
+import com.fadlan.fireporter.utils.getProperty
 import com.fadlan.fireporter.viewmodel.FireporterViewModel
 import javafx.collections.FXCollections
 import javafx.event.ActionEvent
@@ -30,11 +31,7 @@ class FireporterController(
     private val controllerScope = CoroutineScope(Dispatchers.Main)
     private var job: Job? = null
     private val icon: Image = Image(FireporterApp::class.java.getResourceAsStream("fireporter-icon.png"))
-    private val version: String = object {}.javaClass
-        .getResourceAsStream("/version.properties")
-        ?.use { stream ->
-            java.util.Properties().apply { load(stream) }
-        }?.getProperty("app.version") ?: "Unknown"
+    private val version: String = getProperty("config/app.properties", "app.version")
 
     @FXML
     private lateinit var versionLabel: Label

@@ -1,5 +1,8 @@
 package com.fadlan.fireporter.utils
 
+import java.io.FileInputStream
+import java.util.Properties
+
 fun Any.prettyPrint() {
 
     var indentLevel = 0
@@ -36,4 +39,20 @@ fun Any.prettyPrint() {
     }
 
     println(stringBuilder.toString())
+}
+
+fun loadProperties(path: String): Properties? {
+    val safePath = if (!path.startsWith("/") || !path.startsWith("\\")) "/$path"
+                else path
+    val properties = object {}.javaClass
+        .getResourceAsStream(safePath)
+        ?.use { stream ->
+            java.util.Properties().apply { load(stream) }
+        }
+    return properties
+}
+
+fun getProperty(path: String, key: String): String {
+    val property = loadProperties(path)
+    return property?.getProperty(key) ?: "Unknown"
 }
