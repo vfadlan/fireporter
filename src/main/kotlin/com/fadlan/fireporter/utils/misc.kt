@@ -1,6 +1,6 @@
 package com.fadlan.fireporter.utils
 
-import java.io.FileInputStream
+import java.math.BigDecimal
 import java.util.Properties
 
 fun Any.prettyPrint() {
@@ -39,6 +39,10 @@ fun Any.prettyPrint() {
     }
 
     println(stringBuilder.toString())
+}
+
+fun HashMap<String, BigDecimal>.getOrZero(key: String): BigDecimal {
+    return this.getOrDefault(key, BigDecimal(0))
 }
 
 fun loadProperties(path: String): Properties? {
