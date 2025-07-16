@@ -13,16 +13,15 @@ import io.ktor.http.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-// (Asset Account)
 class AccountRepository(
     private val ktor: HttpClient,
     private val cred: CredentialProvider,
 ) {
-    private suspend fun fetchSinglePageAccounts(page: Int, date: LocalDate): AccountResponse {
+    private suspend fun fetchSinglePageAccounts(page: Int, date: LocalDate, type: String): AccountResponse {
         val response: HttpResponse = ktor.request(cred.host) {
             url {
                 appendPathSegments("api", "v1", "accounts")
-                parameters.append("type", "asset")
+                parameters.append("type", type)
                 parameters.append("date", date.toString())
                 parameters.append("page", page.toString())
             }
@@ -33,22 +32,22 @@ class AccountRepository(
         return response.body()
     }
 
-    suspend fun fetchAccounts(date: LocalDate): Array<AccountDto> {
+    suspend fun fetchAccounts(date: LocalDate, type: String): Array<AccountDto> {
         var currentPage = 1
-        val accountResponse = fetchSinglePageAccounts(currentPage, date)
+        val accountResponse = fetchSinglePageAccounts(currentPage, date, type)
         val totalPages = accountResponse.meta?.pagination?.totalPages ?: 1
 
         var accounts: Array<AccountDto> = accountResponse.data
 
         while (currentPage < totalPages) {
             currentPage++
-            accounts += fetchSinglePageAccounts(currentPage, date).data
+            accounts += fetchSinglePageAccounts(currentPage, date, type).data
         }
         return accounts
     }
 
-    suspend fun getAccountStatistics(dateRange: DateRangeBoundaries):  MutableList<Account> {
-        val fetchedAccounts = fetchAccounts(dateRange.endDate)
+    suspend fun getAssetAccounts(dateRange: DateRangeBoundaries):  MutableList<Account> {
+        val fetchedAccounts = fetchAccounts(dateRange.endDate, "asset")
 
         val accounts = mutableListOf<Account>()
         for (account in fetchedAccounts) {
@@ -58,9 +57,9 @@ class AccountRepository(
                     account.id,
                     attr.name,
                     attr.type,
-                    attr.currencyCode,
-                    attr.currencySymbol,
-                    attr.currencyDecimalPlaces,
+                    attr.currencyCode?:"",
+                    attr.currencySymbol?:"",
+                    attr.currencyDecimalPlaces?:2,
                     attr.currentBalance.toBigDecimal(),
                     attr.currentBalanceDate,
                     attr.accountNumber,

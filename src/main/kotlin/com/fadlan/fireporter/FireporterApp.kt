@@ -104,6 +104,7 @@ class FireporterApp : Application() {
                     get<HttpClient>(),
                     get<CredentialProvider>(),
                     get<AccountRepository>(),
+                    get<TransactionRepository>()
                 )
             }
 

@@ -44,7 +44,7 @@ class DataCollectorService(
     private suspend fun collectData(dateRange: DateRangeBoundaries, withAttachment: Boolean) {
         logger.info("Collecting accounts and charts data...")
         progressTracker.report("Collecting accounts and charts data")
-        accounts = accountRepository.getAccountStatistics(dateRange)
+        accounts = accountRepository.getAssetAccounts(dateRange)
         if (!accountRepository.hasActiveAccountInRange(dateRange, accounts)) throw InactiveAccountException()
         chart = chartRepository.getMergedChart(dateRange)
 

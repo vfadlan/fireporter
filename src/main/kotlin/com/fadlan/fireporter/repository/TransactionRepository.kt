@@ -38,7 +38,7 @@ class TransactionRepository(
         return response.body()
     }
 
-    private suspend fun fetchTransactions(dateRange: DateRangeBoundaries): MutableList<TransactionDto> {
+    suspend fun fetchTransactions(dateRange: DateRangeBoundaries): MutableList<TransactionDto> {
         var currentPage = 1
         val transactionResponse = fetchSinglePageTransactions(currentPage, dateRange)
         val totalPages = transactionResponse.meta.pagination.totalPages

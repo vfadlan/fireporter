@@ -24,8 +24,11 @@ Fireporter does not offer pre-built binaries for MacOS old architecture. You mus
 
 ## ✅ TODO
 
-- [ ] Budget
+- [ ] Change from list to table on Transaction History
+- [ ] Separate Balance Left on Transaction History
+- [ ] Separate Chart Plot Line per Account
 - [ ] Multi-currency support (Major Update)
+- [ ] Budget
 - [x] <s>Toggle attachments</s>
 - [x] <s>Add Logging</s>
 - [x] <s>Build to executable for distribution</s>
@@ -33,8 +36,9 @@ Fireporter does not offer pre-built binaries for MacOS old architecture. You mus
 
 ## ⚠️ Important Notes
 - Currently, supports only Indonesian Rupiah (IDR). Multi-currency support is planned.
-- Release only available for Windows 10, others will be added.
-- Fireporter only reads data from Firefly III via API and formats it into a PDF.
+- Release are available for `Windows x64`, `Linux x64`, and `MacOS (Apple Silicon)`. But only Windows version that has been tested.
+- - Fireporter only reads data from Firefly III via API and formats it into a PDF.
+- Tips: Store attachments as image instead of pdf for faster process. Fireporter will have to convert entire pages of PDF file to multiple image files before attaching it to generated report.
 
 ## 📄 Disclaimer
 Fireporter is provided "as is", without warranty of any kind. The developer is not responsible for any loss, damage, or errors caused by use of this application. Use at your own risk.
@@ -45,6 +49,8 @@ This project is licensed under the [GNU AGPL v3.0](LICENSE).
 ## 📌 Changelog
 ### 1.0.3 - 2025/07/11
 - New: Added a GitHub Action for building and releasing distributions.
+- New: Implement up to service layers logging.
+- New: Cache attachments after download until app closed.
 - Changed: Switched the jdkDownload source to a custom JDK and JavaFX bundle.
 - Changed: Jumped the major version to 1 to ensure compatibility with macOS.
 

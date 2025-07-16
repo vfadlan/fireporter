@@ -43,7 +43,7 @@ class ReportUtilsTest : StringSpec({
     }
 
     // formatTime
-    "should format LocalDateTime to full English date" {
+    "should format LocalTime to 24h format time" {
         val dateTime = LocalDateTime.of(LocalDate.of(2022, 5, 1), LocalTime.of(20, 15, 0))
         ReportUtils.formatTime(dateTime.toLocalTime()) shouldBe "20:15"
     }
@@ -57,9 +57,9 @@ class ReportUtilsTest : StringSpec({
         ReportUtils.formatTime(time) shouldBe "14:30"
     }
 
-    "should handle midnight (00:00:00) as 24:00:00 due to 'kk' pattern" {
+    "should handle midnight (00:00:00) as 00:00:00 due to 'HH' pattern" {
         val time = LocalTime.of(0, 0, 0)
-        ReportUtils.formatTime(time) shouldBe "24:00"
+        ReportUtils.formatTime(time) shouldBe "00:00"
     }
 
     "should handle 12 PM (noon) correctly" {
