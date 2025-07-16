@@ -38,7 +38,7 @@ class ReportUtils {
         fun formatTime(time: LocalTime?): String {
             if (time == null) return ""
 
-            return time.format(DateTimeFormatter.ofPattern("kk:mm"))
+            return time.format(DateTimeFormatter.ofPattern("HH:mm"))
         }
 
         @JvmStatic

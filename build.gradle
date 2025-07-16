@@ -140,7 +140,7 @@ tasks.processResources {
 }
 
 processResources {
-    filesMatching('**/version.properties') {
+    filesMatching('**/app.properties') {
         expand(version: project.version)
     }
 }
