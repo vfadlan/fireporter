@@ -153,12 +153,10 @@ class TransactionRepository(
         return journals
     }
 
-    suspend fun getTransactionJournals(dateRange: DateRangeBoundaries, initialBalance: HashMap<String, BigDecimal>): MutableList<TransactionJournal> {
-        val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-
+    suspend fun getTransactionJournals(dateRange: DateRangeBoundaries, initialBalances: HashMap<String, BigDecimal>): MutableList<TransactionJournal> {
         val fetchedTransactions = fetchTransactions(dateRange)
         val journals: MutableList<TransactionJournal> = mutableListOf()
-        val currentBalance = initialBalance
+        val currentBalances = initialBalances
         val journalIds = mutableListOf<Int>()
 
         for (transaction in fetchedTransactions) {
@@ -170,8 +168,8 @@ class TransactionRepository(
                     continue
                 }
 
-                currentBalance[journal.sourceId] = currentBalance.getOrZero(journal.sourceId) - journal.amount.toBigDecimal()
-                currentBalance[journal.destinationId] = currentBalance.getOrZero(journal.destinationId) + journal.amount.toBigDecimal()
+                currentBalances[journal.sourceId] = currentBalances.getOrZero(journal.sourceId) - journal.amount.toBigDecimal()
+                currentBalances[journal.destinationId] = currentBalances.getOrZero(journal.destinationId) + journal.amount.toBigDecimal()
 
                 val datetime = ZonedDateTime.parse(journal.date)
                 val epochTime = datetime.toEpochSecond()
@@ -219,8 +217,8 @@ class TransactionRepository(
                         journal.hasAttachments,
                         journalAttachment,
                         balanceLeft=null,
-                        currentBalance[journal.sourceId],
-                        currentBalance[journal.destinationId],
+                        currentBalances[journal.sourceId],
+                        currentBalances[journal.destinationId],
                         journalElementId,
                         firstAttachmentElementId
                     )
