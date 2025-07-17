@@ -7,6 +7,7 @@ import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.model.GeneralOverview
 import com.fadlan.fireporter.model.TransactionJournal
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.utils.getOrZero
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -140,6 +141,86 @@ class TransactionRepository(
                         journal.hasAttachments,
                         journalAttachment,
                         currentBalance,
+                        currentBalance,
+                        currentBalance,
+                        journalElementId,
+                        firstAttachmentElementId
+                    )
+                )
+            }
+        }
+
+        return journals
+    }
+
+    suspend fun getTransactionJournals(dateRange: DateRangeBoundaries, initialBalance: HashMap<String, BigDecimal>): MutableList<TransactionJournal> {
+        val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+
+        val fetchedTransactions = fetchTransactions(dateRange)
+        val journals: MutableList<TransactionJournal> = mutableListOf()
+        val currentBalance = initialBalance
+        val journalIds = mutableListOf<Int>()
+
+        for (transaction in fetchedTransactions) {
+            val transactionJournals = transaction.attributes.transactions
+            val attachments = attachmentRepository.getAttachmentsByTransactionId(transaction.id)
+
+            for (journal in transactionJournals) {
+                if (!journalIds.add(journal.transactionJournalId.toInt())) {
+                    continue
+                }
+
+                currentBalance[journal.sourceId] = currentBalance.getOrZero(journal.sourceId) - journal.amount.toBigDecimal()
+                currentBalance[journal.destinationId] = currentBalance.getOrZero(journal.destinationId) + journal.amount.toBigDecimal()
+
+                val datetime = ZonedDateTime.parse(journal.date)
+                val epochTime = datetime.toEpochSecond()
+                val journalElementId = "$epochTime-${journal.transactionJournalId}"
+                var firstAttachmentElementId: String? = null
+
+                val journalAttachment = mutableListOf<Attachment>()
+                val iterator = attachments.iterator()
+                while (iterator.hasNext()) {
+                    val attachment = iterator.next()
+                    if (attachment.attachableId == journal.transactionJournalId) {
+                        attachment.elementId = "$journalElementId-${attachment.id}"
+                        attachment.parentId = journalElementId
+                        attachment.parentDescription = journal.description
+
+                        journalAttachment += attachment
+                        if (firstAttachmentElementId.isNullOrBlank()) firstAttachmentElementId = attachment.elementId
+                        iterator.remove()
+                    }
+                }
+                
+                journals.add(
+                    TransactionJournal(
+                        journal.transactionJournalId,
+                        journal.type,
+                        datetime,
+                        journal.order,
+                        journal.currencyCode,
+                        journal.currencySymbol,
+                        journal.amount.toBigDecimal(),
+                        journal.description,
+                        journal.sourceId,
+                        journal.sourceName,
+                        journal.sourceType,
+                        journal.destinationId,
+                        journal.destinationName,
+                        journal.destinationType,
+                        journal.budgetId,
+                        journal.budgetName,
+                        journal.categoryId,
+                        journal.categoryName,
+                        journal.billId,
+                        journal.billName,
+                        journal.tags,
+                        journal.hasAttachments,
+                        journalAttachment,
+                        balanceLeft=null,
+                        currentBalance[journal.sourceId],
+                        currentBalance[journal.destinationId],
                         journalElementId,
                         firstAttachmentElementId
                     )

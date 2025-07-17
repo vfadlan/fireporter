@@ -271,16 +271,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        var openingBalance = 0.toBigDecimal()
-
-                        if (account.attributes.openingBalanceDate!=null) {
-                            val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate?:"",textDateFormat)
-                            openingBalance = if (
-                                !openingBalanceDate.isBefore(dateRange.startDate) &&
-                                openingBalanceDate.isBefore(dateRange.endDate)
-                            ) account.attributes.openingBalance.toBigDecimal()
-                            else 0.toBigDecimal()
-                        }
                         endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                     }
                 }
@@ -299,16 +289,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        var openingBalance = 0.toBigDecimal()
-
-                        if (account.attributes.openingBalanceDate!=null) {
-                            val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate?:"",textDateFormat)
-                            openingBalance = if (
-                                !openingBalanceDate.isBefore(dateRange.startDate) &&
-                                openingBalanceDate.isBefore(dateRange.endDate)
-                            ) account.attributes.openingBalance.toBigDecimal()
-                            else 0.toBigDecimal()
-                        }
                         endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                     }
                 }
@@ -327,16 +307,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        var openingBalance = 0.toBigDecimal()
-
-                        if (account.attributes.openingBalanceDate!=null) {
-                            val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate?:"",textDateFormat)
-                            openingBalance = if (
-                                !openingBalanceDate.isBefore(dateRange.startDate) &&
-                                openingBalanceDate.isBefore(dateRange.endDate)
-                            ) account.attributes.openingBalance.toBigDecimal()
-                            else 0.toBigDecimal()
-                        }
                         endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                     }
                 }
@@ -355,16 +325,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        var openingBalance = 0.toBigDecimal()
-
-                        if (account.attributes.openingBalanceDate!=null) {
-                            val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate?:"",textDateFormat)
-                            openingBalance = if (
-                                !openingBalanceDate.isBefore(dateRange.startDate) &&
-                                openingBalanceDate.isBefore(dateRange.endDate)
-                            ) account.attributes.openingBalance.toBigDecimal()
-                            else 0.toBigDecimal()
-                        }
                         endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                     }
                 }
@@ -376,7 +336,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         LocalDate.parse("2025-01-01"),
                         LocalDate.parse("2025-01-31")
                     )
-                    val accounts = accountRepository.fetchAccounts(dateRange.endDate, "asset")
                     val currencyAtStart = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
                     val currencyAtEnd = summaryRepository.getAssetBalanceAtDate(dateRange.endDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.END)
                     val cashFlows = summaryRepository.calculateCashFlow(dateRange, GroupBy.CURRENCY_CODE)
@@ -396,7 +355,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         LocalDate.parse("2025-01-01"),
                         LocalDate.parse("2025-04-30")
                     )
-                    val accounts = accountRepository.fetchAccounts(dateRange.endDate, "asset")
                     val currencyAtStart = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
                     val currencyAtEnd = summaryRepository.getAssetBalanceAtDate(dateRange.endDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.END)
                     val cashFlows = summaryRepository.calculateCashFlow(dateRange, GroupBy.CURRENCY_CODE)
@@ -416,7 +374,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         LocalDate.parse("2025-01-01"),
                         LocalDate.parse("2025-06-30")
                     )
-                    val accounts = accountRepository.fetchAccounts(dateRange.endDate, "asset")
                     val currencyAtStart = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
                     val currencyAtEnd = summaryRepository.getAssetBalanceAtDate(dateRange.endDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.END)
                     val cashFlows = summaryRepository.calculateCashFlow(dateRange, GroupBy.CURRENCY_CODE)
@@ -436,7 +393,6 @@ class SummaryRepositoryTest: ExpectSpec({
                         LocalDate.parse("2025-05-01"),
                         LocalDate.parse("2025-06-30")
                     )
-                    val accounts = accountRepository.fetchAccounts(dateRange.endDate, "asset")
                     val currencyAtStart = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
                     val currencyAtEnd = summaryRepository.getAssetBalanceAtDate(dateRange.endDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.END)
                     val cashFlows = summaryRepository.calculateCashFlow(dateRange, GroupBy.CURRENCY_CODE)

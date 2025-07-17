@@ -125,8 +125,8 @@ class SummaryRepository(
 
     suspend fun getAssetBalanceAtDate(date: LocalDate, groupBy: GroupBy, timeOfDay: TimeOfDayBoundary): HashMap<String, BigDecimal> {
         val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-
-        val fetchedAccounts = accountRepository.fetchAccounts(date, "asset")
+        val accountsType = if (groupBy==GroupBy.ACCOUNT) "all" else "asset"
+        val fetchedAccounts = accountRepository.fetchAccounts(date, accountsType)
         val cashFlows = calculateCashFlow(DateRangeBoundaries(date, date), groupBy)
         val balances = hashMapOf<String, BigDecimal>()
 

@@ -38,6 +38,8 @@ data class TransactionJournal(
     val attachments: MutableList<Attachment>,
 
     val balanceLeft: BigDecimal?=null,
+    val sourceBalanceLeft: BigDecimal?=null,
+    val destinationBalanceLeft: BigDecimal?=null,
 
     var elementId: String?=null,
     var firstAttachmentElementId: String?=null
