@@ -15,10 +15,6 @@ import org.slf4j.Logger
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Date
 import javax.imageio.ImageIO
 import kotlin.collections.HashMap
 
@@ -107,11 +103,7 @@ fun HashMap<String, Any>.loadCommonParameters(data: ReportData, theme: Theme) {
 
     this["THEME_COLOR"] = theme.colorHex
     this["THEME_DARK_COLOR"] = theme.darkColorHex
-
-    this["CURRENCY_CODE"] = data.currencyCode
-    this["CURRENCY_SYMBOL"] = data.currencySymbol
-    this["CURRENCY_DECIMAL_PLACES"] = data.currencyDecimalPlaces
-
+    this["CURRENCY"] = data.currency
     this["DATE_RANGE"] = data.dateRange
 }
 
@@ -121,8 +113,6 @@ fun HashMap<String, Any>.loadCover(coverImage: BufferedImage, coverReport: Jaspe
 }
 
 fun HashMap<String, Any>.loadSummary(data: ReportData, summaryReport: JasperReport) {
-    val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-
     this["SUMMARY_REPORT"] = summaryReport
 
     this["GENERAL_OVERVIEW"] = data.generalOverview
@@ -130,19 +120,7 @@ fun HashMap<String, Any>.loadSummary(data: ReportData, summaryReport: JasperRepo
     this["INCOME_INSIGHT"] = JRBeanCollectionDataSource(data.incomeInsight)
     this["EXPENSE_INSIGHT"] = JRBeanCollectionDataSource(data.expenseInsight)
 
-    val dataSource = JRBeanCollectionDataSource(
-        data.chart.mapNotNull { (key, value) ->
-            try {
-                if (key.isBlank()) return@mapNotNull null
-                val localDate = LocalDate.parse(key, textDateFormat)
-                val date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
-
-                ChartEntry(date, value)
-            } catch (e: Exception) {
-                null
-            }
-        }
-    )
+    val dataSource = JRBeanCollectionDataSource(data.chart[data.currency.code])
 
     this["SUMMARY_CHART_DATASET"] = dataSource
 }

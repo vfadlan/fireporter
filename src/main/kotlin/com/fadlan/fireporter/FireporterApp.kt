@@ -108,6 +108,13 @@ class FireporterApp : Application() {
                 )
             }
 
+            single {
+                CurrencyRepository(
+                    get<HttpClient>(),
+                    get<CredentialProvider>(),
+                )
+            }
+
             includes(classLoggerModule<JasperReportService>())
             single {
                 JasperReportService(
@@ -135,6 +142,7 @@ class FireporterApp : Application() {
                     get<InsightRepository>(),
                     get<TransactionRepository>(),
                     get<AttachmentService>(),
+                    get<CurrencyRepository>(),
                     get<HttpClient>(),
                     get<CredentialProvider>(),
                     get(named(DataCollectorService::class.qualifiedName!!))

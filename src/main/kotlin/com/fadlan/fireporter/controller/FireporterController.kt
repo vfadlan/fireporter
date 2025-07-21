@@ -262,7 +262,9 @@ class FireporterController(
 
         progressTracker.reset()
         job = controllerScope.launch {
-            viewModel.generate(host, token, periodComboBox, yearComboBox, activeTheme, includeAttachmentsCheckBox)
+            if (viewModel.testConnection(host, token)) {
+                viewModel.generate(periodComboBox, yearComboBox, activeTheme, includeAttachmentsCheckBox)
+            }
 
             includeAttachmentsCheckBox.isDisable = false
             enableAllThemeButtons()

@@ -7,6 +7,7 @@ import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.model.GeneralOverview
 import com.fadlan.fireporter.model.TransactionJournal
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.utils.exceptions.MultipleCurrencyException
 import com.fadlan.fireporter.utils.getOrZero
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -156,7 +157,7 @@ class TransactionRepository(
     suspend fun getTransactionJournals(dateRange: DateRangeBoundaries, initialBalances: HashMap<String, BigDecimal>): MutableList<TransactionJournal> {
         val fetchedTransactions = fetchTransactions(dateRange)
         val journals: MutableList<TransactionJournal> = mutableListOf()
-        val currentBalances = initialBalances
+        val currentBalances = HashMap(initialBalances)
         val journalIds = mutableListOf<Int>()
 
         for (transaction in fetchedTransactions) {
@@ -164,9 +165,8 @@ class TransactionRepository(
             val attachments = attachmentRepository.getAttachmentsByTransactionId(transaction.id)
 
             for (journal in transactionJournals) {
-                if (!journalIds.add(journal.transactionJournalId.toInt())) {
-                    continue
-                }
+                if (!journalIds.add(journal.transactionJournalId.toInt())) continue
+                if (journal.foreignCurrencyCode!=null && journal.currencyCode!=journal.foreignCurrencyCode) throw MultipleCurrencyException()
 
                 currentBalances[journal.sourceId] = currentBalances.getOrZero(journal.sourceId) - journal.amount.toBigDecimal()
                 currentBalances[journal.destinationId] = currentBalances.getOrZero(journal.destinationId) + journal.amount.toBigDecimal()

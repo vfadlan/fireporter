@@ -1,9 +1,6 @@
 package com.fadlan.fireporter.repository
 
-import com.fadlan.fireporter.dto.BasicSummaryDto
-import com.fadlan.fireporter.dto.TransactionJournalDto
 import com.fadlan.fireporter.model.DateRangeBoundaries
-import com.fadlan.fireporter.model.GeneralOverview
 import com.fadlan.fireporter.model.GroupBy
 import com.fadlan.fireporter.model.TimeOfDayBoundary
 import com.fadlan.fireporter.network.CredentialProvider
@@ -14,7 +11,6 @@ import com.fadlan.fireporter.utils.getProperty
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.ktor.client.*
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -82,21 +78,6 @@ class SummaryRepositoryTest: ExpectSpec({
         val summaryRepository = KoinJavaComponent.get<SummaryRepository>(SummaryRepository::class.java)
         val accountRepository = KoinJavaComponent.get<AccountRepository>(AccountRepository::class.java)
         val transactionRepository = KoinJavaComponent.get<TransactionRepository>(TransactionRepository::class.java)
-        val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-
-        context("fetchSummaryBasic() /summary/basic") {
-            expect("response type should be HashMap<String, BasicSummaryDto>") {
-                val res = summaryRepository.fetchSummaryBasic(
-                    DateRangeBoundaries(
-                        LocalDate.parse("2025-01-01"),
-                        LocalDate.parse("2025-01-31")
-                    )
-                )
-                for (key in res.keys) {
-                    res[key].shouldBeInstanceOf<BasicSummaryDto>()
-                }
-            }
-        }
 
         context("calculateCashFlow()") {
             context("GroupBy.ACCOUNT") {
@@ -114,6 +95,7 @@ class SummaryRepositoryTest: ExpectSpec({
                         val endingBalance = accountAtEnd.find { it.id == accountId }?.attributes?.currentBalance?.toBigDecimal()
                         if (initialBalance!=null && endingBalance!=null) {
                             val cashFlow = cashFlows.getOrZero(accountId)
+                            println("e: $endingBalance | c: ${initialBalance + cashFlow} | i: $initialBalance + c: $cashFlow")
                             endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                         } else {
                             fail("Some account not found")
@@ -135,6 +117,7 @@ class SummaryRepositoryTest: ExpectSpec({
                         val endingBalance = accountAtEnd.find { it.id == accountId }?.attributes?.currentBalance?.toBigDecimal()
                         if (initialBalance!=null && endingBalance!=null) {
                             val cashFlow = cashFlows.getOrZero(accountId)
+                            println("e: $endingBalance | c: ${initialBalance + cashFlow} | i: $initialBalance + c: $cashFlow")
                             endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                         } else {
                             fail("Some account not found")
@@ -156,6 +139,7 @@ class SummaryRepositoryTest: ExpectSpec({
                         val endingBalance = accountAtEnd.find { it.id == accountId }?.attributes?.currentBalance?.toBigDecimal()
                         if (initialBalance!=null && endingBalance!=null) {
                             val cashFlow = cashFlows.getOrZero(accountId)
+                            println("e: $endingBalance | c: ${initialBalance + cashFlow} | i: $initialBalance + c: $cashFlow")
                             endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                         } else {
                             fail("Some account not found")
@@ -177,6 +161,7 @@ class SummaryRepositoryTest: ExpectSpec({
                         val endingBalance = accountAtEnd.find { it.id == accountId }?.attributes?.currentBalance?.toBigDecimal()
                         if (initialBalance!=null && endingBalance!=null) {
                             val cashFlow = cashFlows.getOrZero(accountId)
+                            println("e: $endingBalance | c: ${initialBalance + cashFlow} | i: $initialBalance + c: $cashFlow")
                             endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
                         } else {
                             fail("Some account not found")
@@ -271,7 +256,9 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        val currentBalance = account.attributes.currentBalance.toBigDecimal()
+                        currentBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        endingBalance.compareTo(currentBalance) shouldBe 0
                     }
                 }
 
@@ -289,7 +276,9 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        val currentBalance = account.attributes.currentBalance.toBigDecimal()
+                        currentBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        endingBalance.compareTo(currentBalance) shouldBe 0
                     }
                 }
 
@@ -307,7 +296,9 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        val currentBalance = account.attributes.currentBalance.toBigDecimal()
+                        currentBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        endingBalance.compareTo(currentBalance) shouldBe 0
                     }
                 }
 
@@ -325,7 +316,9 @@ class SummaryRepositoryTest: ExpectSpec({
                         val initialBalance = accountAtStart.getOrZero(account.id)
                         val endingBalance = accountAtEnd.getOrZero(account.id)
                         val cashFlow = cashFlows.getOrZero(account.id)
-                        endingBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        val currentBalance = account.attributes.currentBalance.toBigDecimal()
+                        currentBalance.compareTo(initialBalance + cashFlow) shouldBe 0
+                        endingBalance.compareTo(currentBalance) shouldBe 0
                     }
                 }
             }

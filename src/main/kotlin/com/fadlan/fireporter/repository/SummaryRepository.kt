@@ -66,8 +66,6 @@ class SummaryRepository(
 
     suspend fun getOverview(dateRange: DateRangeBoundaries): GeneralOverview {
         val periodicSummary = getCashFlowAtPeriod(dateRange)
-        println("c: ${getBalanceAtEndOfDate(dateRange.endDate)}")
-        println("b: ${periodicSummary.balanceInIDR.monetaryValue}")
 
         return GeneralOverview(
             getBalanceAtStartOfDate(dateRange.startDate),

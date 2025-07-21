@@ -1,7 +1,9 @@
 package com.fadlan.fireporter.dto
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 
 @Serializable
 data class TransactionResponse(
@@ -98,7 +100,7 @@ data class TransactionJournalDto(
     @SerialName("recurrence_count")val recurrenceCount: String?=null,
     @SerialName("bunq_payment_id")val bunqPaymentId: String?=null,
     @SerialName("external_url")val externalUrl: String?=null,
-    @SerialName("import_hash_v2")val importHashV2: String,
+    @SerialName("import_hash_v2")val importHashV2: String?=null,
     @SerialName("sepa_cc")val sepaCc: String?=null,
     @SerialName("sepa_ct_op")val sepaCtOp: String?=null,
     @SerialName("sepa_ct_id")val sepaCtId: String?=null,

@@ -1,16 +1,13 @@
 package com.fadlan.fireporter.model
 
 import com.fadlan.fireporter.dto.SystemInfoDto
-import java.math.BigDecimal
 
 data class  ReportData(
     val dateRange: DateRangeBoundaries,
     val theme: Theme,
-    val currencyCode: String,
-    val currencySymbol: String,
-    val currencyDecimalPlaces: Int,
+    val currency: Currency,
     val accounts: MutableList<Account>,
-    val chart: LinkedHashMap<String, BigDecimal>,
+    val chart: HashMap<String, MutableList<ChartEntry>>,
     val generalOverview: GeneralOverview,
     val incomeInsight: MutableList<InsightGroup>,
     val expenseInsight: MutableList<InsightGroup>,

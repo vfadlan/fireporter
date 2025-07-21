@@ -13,8 +13,10 @@ import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.shouldBe
 import io.ktor.client.*
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.java.KoinJavaComponent
+import java.math.BigDecimal
 import java.time.LocalDate
 
 /*
@@ -73,31 +75,56 @@ class TransactionRepositoryTest: ExpectSpec({
 
     context("TransactionRepository") {
         val summaryRepository = KoinJavaComponent.get<SummaryRepository>(SummaryRepository::class.java)
-        val accountRepository = KoinJavaComponent.get<AccountRepository>(AccountRepository::class.java)
         val transactionRepository = KoinJavaComponent.get<TransactionRepository>(TransactionRepository::class.java)
 
         context("getTransactionJournals()") {
-            context("FMy-25") {
+            expect("should calculate balances correctly FMr-25") {
                 val dateRange = DateRangeBoundaries(
-                    LocalDate.parse("2025-01-01"),
-                    LocalDate.parse("2025-01-31")
+                    LocalDate.parse("2025-02-01"),
+                    LocalDate.parse("2025-03-31")
                 )
-                val currentBalances = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.ACCOUNT,TimeOfDayBoundary.START)
-                val transactionJournals = transactionRepository.getTransactionJournals(dateRange, currentBalances)
+                val initialBalances = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.ACCOUNT, TimeOfDayBoundary.START)
+                val currentBalances = HashMap<String, BigDecimal>(initialBalances)
+                val transactionJournals = transactionRepository.getTransactionJournals(dateRange, initialBalances)
 
                 for (journal in transactionJournals) {
                     currentBalances[journal.sourceId] = currentBalances.getOrZero(journal.sourceId) - journal.amount
-                    currentBalances[journal.destinationId] =
-                        currentBalances.getOrZero(journal.destinationId) + journal.amount
+                    currentBalances[journal.destinationId] = currentBalances.getOrZero(journal.destinationId) + journal.amount
 
                     if (journal.sourceBalanceLeft != null && journal.destinationBalanceLeft != null) {
-                        journal.sourceBalanceLeft!!.compareTo(currentBalances.getOrZero(journal.sourceId)) shouldBe 0
-                        journal.destinationBalanceLeft!!.compareTo(currentBalances.getOrZero(journal.destinationId)) shouldBe 0
+                        journal.sourceBalanceLeft!!.compareTo(currentBalances.getOrZero(journal.sourceId)).shouldBe(0)
+                        journal.destinationBalanceLeft!!.compareTo(currentBalances.getOrZero(journal.destinationId)).shouldBe(0)
+                    } else {
+                        fail(("Balance left on source or dest. is null."))
+                    }
+                }
+            }
+
+            expect("should calculate balances correctly MA-25") {
+                val dateRange = DateRangeBoundaries(
+                    LocalDate.parse("2025-03-01"),
+                    LocalDate.parse("2025-04-30")
+                )
+                val initialBalances = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.ACCOUNT, TimeOfDayBoundary.START)
+                val currentBalances = HashMap<String, BigDecimal>(initialBalances)
+                val transactionJournals = transactionRepository.getTransactionJournals(dateRange, initialBalances)
+
+                for (journal in transactionJournals) {
+                    currentBalances[journal.sourceId] = currentBalances.getOrZero(journal.sourceId) - journal.amount
+                    currentBalances[journal.destinationId] = currentBalances.getOrZero(journal.destinationId) + journal.amount
+
+                    if (journal.sourceBalanceLeft != null && journal.destinationBalanceLeft != null) {
+                        journal.sourceBalanceLeft!!.compareTo(currentBalances.getOrZero(journal.sourceId)).shouldBe(0)
+                        journal.destinationBalanceLeft!!.compareTo(currentBalances.getOrZero(journal.destinationId)).shouldBe(0)
                     } else {
                         fail(("Balance left on source or dest. is null."))
                     }
                 }
             }
         }
+    }
+
+    afterSpec {
+        stopKoin()
     }
 })
