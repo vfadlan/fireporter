@@ -60,12 +60,12 @@ class FireporterViewModel(
             logger.info("PDF Generated successfully.")
         } catch (exception: InactiveAccountException) {
             logger.error("Account inactive at period $period $year.")
-            progressTracker.sendMessage(exception.message)
+            progressTracker.sendMessage("No active account found at period $period $year.")
             progressTracker.resetProgress()
 
             IconizedAlert(
                 Alert.AlertType.ERROR,
-                "No account Found",
+                "No active account found",
                 "${exception.message}",
                 "You were inactive at $period $year"
             ).showAndWait()

@@ -5,15 +5,13 @@
 	<parameter name="REPORT_TITLE" class="java.lang.String"/>
 	<parameter name="THEME_COLOR" class="java.lang.String"/>
 	<parameter name="THEME_DARK_COLOR" class="java.lang.String"/>
-	<parameter name="CURRENCY_CODE" class="java.lang.String"/>
-	<parameter name="CURRENCY_SYMBOL" class="java.lang.String"/>
-	<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
+	<parameter name="CURRENCY" class="com.fadlan.fireporter.model.Currency"/>
 	<parameter name="COVER_REPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="THEME_COVER" class="java.awt.image.BufferedImage"/>
 	<parameter name="SUMMARY_REPORT" class="net.sf.jasperreports.engine.JasperReport"/>
 	<parameter name="GENERAL_OVERVIEW" class="com.fadlan.fireporter.model.GeneralOverview"/>
 	<parameter name="ASSET_ACCOUNTS" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
-	<parameter name="SUMMARY_CHART_DATASET" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+	<parameter name="SUMMARY_CHART_DATASOURCE" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="DATE_RANGE" class="com.fadlan.fireporter.model.DateRangeBoundaries"/>
 	<parameter name="INCOME_INSIGHT" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="EXPENSE_INSIGHT" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
@@ -51,8 +49,8 @@
 		<part uuid="b603afef-50ac-4c09-91b0-9725b369d9e9">
 			<component kind="subreportPart">
 				<expression><![CDATA[$P{SUMMARY_REPORT}]]></expression>
-				<parameter name="REPORT_DATA_SOURCE">
-					<expression><![CDATA[$P{SUMMARY_CHART_DATASET}]]></expression>
+				<parameter name="CHART_DATASOURCE">
+					<expression><![CDATA[$P{SUMMARY_CHART_DATASOURCE}]]></expression>
 				</parameter>
 				<parameter name="THEME_DARK_COLOR">
 					<expression><![CDATA[$P{THEME_DARK_COLOR}]]></expression>
@@ -60,14 +58,8 @@
 				<parameter name="THEME_COLOR">
 					<expression><![CDATA[$P{THEME_COLOR}]]></expression>
 				</parameter>
-				<parameter name="CURRENCY_CODE">
-					<expression><![CDATA[$P{CURRENCY_CODE}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_SYMBOL">
-					<expression><![CDATA[$P{CURRENCY_SYMBOL}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_DECIMAL_PLACES">
-					<expression><![CDATA[$P{CURRENCY_DECIMAL_PLACES}]]></expression>
+				<parameter name="CURRENCY">
+					<expression><![CDATA[$P{CURRENCY}]]></expression>
 				</parameter>
 				<parameter name="GENERAL_OVERVIEW">
 					<expression><![CDATA[$P{GENERAL_OVERVIEW}]]></expression>
@@ -98,14 +90,8 @@
 				<parameter name="THEME_COLOR">
 					<expression><![CDATA[$P{THEME_COLOR}]]></expression>
 				</parameter>
-				<parameter name="CURRENCY_CODE">
-					<expression><![CDATA[$P{CURRENCY_CODE}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_SYMBOL">
-					<expression><![CDATA[$P{CURRENCY_SYMBOL}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_DECIMAL_PLACES">
-					<expression><![CDATA[$P{CURRENCY_DECIMAL_PLACES}]]></expression>
+				<parameter name="CURRENCY">
+					<expression><![CDATA[$P{CURRENCY}]]></expression>
 				</parameter>
 				<parameter name="GENERAL_OVERVIEW">
 					<expression><![CDATA[$P{GENERAL_OVERVIEW}]]></expression>
@@ -131,15 +117,6 @@
 				<parameter name="THEME_COLOR">
 					<expression><![CDATA[$P{THEME_COLOR}]]></expression>
 				</parameter>
-				<parameter name="CURRENCY_CODE">
-					<expression><![CDATA[$P{CURRENCY_CODE}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_SYMBOL">
-					<expression><![CDATA[$P{CURRENCY_SYMBOL}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_DECIMAL_PLACES">
-					<expression><![CDATA[$P{CURRENCY_DECIMAL_PLACES}]]></expression>
-				</parameter>
 				<parameter name="GENERAL_OVERVIEW">
 					<expression><![CDATA[$P{GENERAL_OVERVIEW}]]></expression>
 				</parameter>
@@ -156,9 +133,6 @@
 				</parameter>
 				<parameter name="THEME_COLOR">
 					<expression><![CDATA[$P{THEME_COLOR}]]></expression>
-				</parameter>
-				<parameter name="CURRENCY_CODE">
-					<expression><![CDATA[$P{CURRENCY_CODE}]]></expression>
 				</parameter>
 				<parameter name="DATE_RANGE">
 					<expression><![CDATA[$P{DATE_RANGE}]]></expression>

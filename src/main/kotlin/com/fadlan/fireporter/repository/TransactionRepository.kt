@@ -124,6 +124,7 @@ class TransactionRepository(
                         journal.order,
                         journal.currencyCode,
                         journal.currencySymbol,
+                        journal.currencyDecimalPlaces,
                         amount,
                         journal.description,
                         journal.sourceId,
@@ -166,7 +167,9 @@ class TransactionRepository(
 
             for (journal in transactionJournals) {
                 if (!journalIds.add(journal.transactionJournalId.toInt())) continue
-                if (journal.foreignCurrencyCode!=null && journal.currencyCode!=journal.foreignCurrencyCode) throw MultipleCurrencyException()
+                if (journal.foreignCurrencyCode!=null) {
+                    if (journal.currencyCode!=journal.foreignCurrencyCode) throw MultipleCurrencyException()
+                }
 
                 currentBalances[journal.sourceId] = currentBalances.getOrZero(journal.sourceId) - journal.amount.toBigDecimal()
                 currentBalances[journal.destinationId] = currentBalances.getOrZero(journal.destinationId) + journal.amount.toBigDecimal()
@@ -199,6 +202,7 @@ class TransactionRepository(
                         journal.order,
                         journal.currencyCode,
                         journal.currencySymbol,
+                        journal.currencyDecimalPlaces,
                         journal.amount.toBigDecimal(),
                         journal.description,
                         journal.sourceId,

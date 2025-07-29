@@ -51,7 +51,7 @@ class FireporterController(
         progressBar.progressProperty().bind(progressTracker.progressProperty)
         statusLabel.textProperty().bind(progressTracker.messageProperty)
 
-        hostTextField.text = "localhost:777"
+        hostTextField.text = "localhost"
         versionLabel.text = "v$version"
         logger.info("JavaFX controller initiated.")
     }

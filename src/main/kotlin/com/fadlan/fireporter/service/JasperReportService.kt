@@ -1,7 +1,7 @@
 package com.fadlan.fireporter.service
 
 import com.fadlan.fireporter.FireporterApp
-import com.fadlan.fireporter.model.ChartEntry
+import com.fadlan.fireporter.model.ChartEntryWrapper
 import com.fadlan.fireporter.model.ReportData
 import com.fadlan.fireporter.model.Theme
 import com.fadlan.fireporter.utils.getProperty
@@ -120,9 +120,11 @@ fun HashMap<String, Any>.loadSummary(data: ReportData, summaryReport: JasperRepo
     this["INCOME_INSIGHT"] = JRBeanCollectionDataSource(data.incomeInsight)
     this["EXPENSE_INSIGHT"] = JRBeanCollectionDataSource(data.expenseInsight)
 
-    val dataSource = JRBeanCollectionDataSource(data.chart[data.currency.code])
+    val chartDataSource = data.chart.flatMap { (seriesName, entries) ->
+        entries.map { ChartEntryWrapper(seriesName, it.label, it.value) }
+    }
 
-    this["SUMMARY_CHART_DATASET"] = dataSource
+    this["SUMMARY_CHART_DATASOURCE"] = JRBeanCollectionDataSource(chartDataSource)
 }
 
 fun HashMap<String, Any>.loadTransactionHistory(data: ReportData, transactionReport: JasperReport) {

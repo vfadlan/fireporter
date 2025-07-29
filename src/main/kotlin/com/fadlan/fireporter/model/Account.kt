@@ -1,6 +1,7 @@
 package com.fadlan.fireporter.model
 
 import java.math.BigDecimal
+import java.time.LocalDate
 
 data class Account(
     val id: String,
@@ -14,5 +15,7 @@ data class Account(
     val accountNumber: String? = null,
     val iban: String? = null,
     val openingBalance: BigDecimal?= BigDecimal(0),
-    val openingBalanceDate: String? = null
+    val openingBalanceDate: String? = null,
+    var initialBalance: BigDecimal?= BigDecimal(0),
+    var  initialBalanceDate: LocalDate? = null,
 )

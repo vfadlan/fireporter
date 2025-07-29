@@ -33,7 +33,7 @@
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 					<box leftPadding="20" rightPadding="20"/>
 				</element>
-				<element kind="textField" uuid="7f58d454-cae0-4ebb-9ccd-c885124eb525" positionType="Float" mode="Opaque" x="230" y="694" width="370" height="36" forecolor="#FFFFFF" backcolor="#911411" fontName="Montserrat" fontSize="20.0" hTextAlign="Left" vTextAlign="Top">
+				<element kind="textField" uuid="7f58d454-cae0-4ebb-9ccd-c885124eb525" positionType="Float" mode="Opaque" x="230" y="693" width="370" height="37" forecolor="#FFFFFF" backcolor="#911411" fontName="Montserrat" fontSize="20.0" hTextAlign="Left" vTextAlign="Top">
 					<expression><![CDATA["Financial Report"]]></expression>
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 					<box leftPadding="20" rightPadding="20"/>

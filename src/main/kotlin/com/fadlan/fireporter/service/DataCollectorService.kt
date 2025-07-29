@@ -7,12 +7,14 @@ import com.fadlan.fireporter.repository.*
 import com.fadlan.fireporter.utils.FxProgressTracker
 import com.fadlan.fireporter.utils.exceptions.IllegalDateRangeException
 import com.fadlan.fireporter.utils.exceptions.InactiveAccountException
+import com.fadlan.fireporter.utils.getOrZero
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import org.slf4j.Logger
+import java.math.BigDecimal
 
 class DataCollectorService(
     private val progressTracker: FxProgressTracker,
@@ -31,26 +33,36 @@ class DataCollectorService(
     private lateinit var accounts: MutableList<Account>
     private lateinit var chart: HashMap<String, MutableList<ChartEntry>>
     private lateinit var generalOverview: GeneralOverview
+    private lateinit var initialBalances: HashMap<String, BigDecimal>
+    private lateinit var endingBalances: HashMap<String, BigDecimal>
     private lateinit var incomeInsight: MutableList<InsightGroup>
     private lateinit var expenseInsight: MutableList<InsightGroup>
     private lateinit var transactionJournals: MutableList<TransactionJournal>
     private lateinit var downloadedAttachments: MutableList<Attachment>
     private lateinit var apiSysInfo: SystemInfoResponse
 
-    private suspend fun collectData(dateRange: DateRangeBoundaries, withAttachment: Boolean) {
+    private suspend fun collectAccounts(dateRange: DateRangeBoundaries) {
         logger.info("Collecting accounts and charts data...")
         progressTracker.report("Collecting accounts and charts data")
         accounts = accountRepository.getAssetAccounts(dateRange)
-        if (!accountRepository.hasActiveAccountInRange(dateRange, accounts)) throw InactiveAccountException()
-        chart = chartRepository.getCharts(dateRange, mainCurrency.code)
+    }
 
-        logger.info("Collecting transactions data...")
-        progressTracker.report("Collecting transactions data")
-        transactionJournals = transactionRepository.getTransactionJournals(dateRange, generalOverview)
+    private suspend fun collectData(dateRange: DateRangeBoundaries, withAttachment: Boolean) {
+        chart = chartRepository.getCharts(dateRange, mainCurrency.code)
 
         logger.info("Collecting general overview data...")
         progressTracker.report("Collecting general overview data")
-        generalOverview = summaryRepository.getOverview(dateRange)
+        generalOverview = summaryRepository.getFullOverview(dateRange)[mainCurrency.code]!!
+        initialBalances = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.ACCOUNT, TimeOfDayBoundary.START)
+
+        for (account in accounts) {
+            account.initialBalance =  initialBalances.getOrZero(account.id)
+            account.initialBalanceDate = dateRange.startDate
+        }
+
+        logger.info("Collecting transactions data...")
+        progressTracker.report("Collecting transactions data")
+        transactionJournals = transactionRepository.getTransactionJournals(dateRange, initialBalances)
 
         logger.info("Collecting income insight...")
         progressTracker.report("Collecting income insight")
@@ -93,8 +105,9 @@ class DataCollectorService(
 
     suspend fun getData(dateRange: DateRangeBoundaries, theme: Theme, withAttachment: Boolean): ReportData {
         checkDateRange(dateRange)
-        collectData(dateRange, withAttachment)
+        collectAccounts(dateRange)
         setMainCurrency()
+        collectData(dateRange, withAttachment)
 
         return ReportData(
             dateRange,

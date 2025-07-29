@@ -11,6 +11,7 @@ data class TransactionJournal(
 
     val currencyCode: String,
     val currencySymbol: String,
+    val currencyDecimalPlaces: Int,
 
     val amount: BigDecimal,
     val description: String,

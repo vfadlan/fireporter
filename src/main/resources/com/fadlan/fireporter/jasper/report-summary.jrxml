@@ -9,34 +9,35 @@
 		<field name="currencyDecimalPlaces" class="java.lang.Integer"/>
 		<field name="currentBalance" class="java.math.BigDecimal"/>
 		<field name="accountNumber" class="java.lang.String"/>
+		<field name="initialBalance" class="java.math.BigDecimal"/>
 	</dataset>
 	<dataset name="INSIGHT_DATASET" uuid="3d0173a8-420c-4885-bb65-a701a75d4592">
-		<parameter name="CURRENCY_SYMBOL" class="java.lang.String"/>
-		<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
+		<parameter name="CURRENCY" class="com.fadlan.fireporter.model.Currency"/>
 		<query language="SQL"><![CDATA[]]></query>
 		<field name="type" class="com.fadlan.fireporter.model.InsightType"/>
 		<field name="filter" class="java.lang.String"/>
 		<field name="insights" class="java.util.List"/>
 	</dataset>
 	<dataset name="INSIGHT_ITEM_DATASET" uuid="cda9c67c-911d-4138-879e-c3f2e91bf037">
-		<parameter name="CURRENCY_SYMBOL" class="java.lang.String"/>
-		<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
+		<parameter name="CURRENCY" class="com.fadlan.fireporter.model.Currency"/>
 		<field name="id" class="java.lang.String"/>
 		<field name="name" class="java.lang.String"/>
 		<field name="difference" class="java.math.BigDecimal"/>
 	</dataset>
+	<dataset name="CHART_DATASET">
+		<field name="seriesName" class="java.lang.String"/>
+		<field name="label" class="java.util.Date"/>
+		<field name="value" class="java.math.BigDecimal"/>
+	</dataset>
 	<parameter name="THEME_DARK_COLOR" class="java.lang.String"/>
 	<parameter name="THEME_COLOR" class="java.lang.String"/>
-	<parameter name="CURRENCY_SYMBOL" class="java.lang.String"/>
-	<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
+	<parameter name="CURRENCY" class="com.fadlan.fireporter.model.Currency"/>
 	<parameter name="GENERAL_OVERVIEW" class="com.fadlan.fireporter.model.GeneralOverview"/>
 	<parameter name="DATE_RANGE" class="com.fadlan.fireporter.model.DateRangeBoundaries"/>
-	<parameter name="CURRENCY_CODE" class="java.lang.String"/>
+	<parameter name="CHART_DATASOURCE" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="ASSET_ACCOUNTS" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="INCOME_INSIGHT" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<parameter name="EXPENSE_INSIGHT" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
-	<field name="label" class="java.util.Date"/>
-	<field name="value" class="java.math.BigDecimal"/>
 	<group name="11_General_Overview">
 		<groupHeader>
 			<band height="570">
@@ -45,8 +46,11 @@
 				</element>
 				<element kind="chart" chartType="timeSeries" uuid="fa7f008e-7d84-4ed8-9fc6-e69e908a7a70" x="15" y="50" width="492" height="240" evaluationTime="Report" linkType="None" linkTarget="Self" customizerClass="com.fadlan.fireporter.utils.ThemeChartCustomizer">
 					<dataset kind="timeSeries" timePeriod="Day">
+						<datasetRun subDataset="CHART_DATASET">
+							<dataSourceExpression><![CDATA[$P{CHART_DATASOURCE}]]></dataSourceExpression>
+						</datasetRun>
 						<series>
-							<seriesExpression><![CDATA["TOTAL ASSETS"]]></seriesExpression>
+							<seriesExpression><![CDATA[$F{seriesName}]]></seriesExpression>
 							<timePeriodExpression><![CDATA[$F{label}]]></timePeriodExpression>
 							<valueExpression><![CDATA[$F{value}]]></valueExpression>
 						</series>
@@ -56,19 +60,19 @@
 						<timeAxisTickLabelFont fontName="Montserrat"/>
 						<valueAxisLabelFont fontName="Montserrat"/>
 					</plot>
-					<propertyExpression name="property.theme_dark_color"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
+<!--					<propertyExpression name="property.theme_dark_color"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>-->
 				</element>
 				<element kind="staticText" uuid="77b8f4e1-7ab4-4eb9-9548-9f4f1b999dcb" x="31" y="393" width="90" height="30" fontName="Roboto" fontSize="10.0" hTextAlign="Left" vTextAlign="Middle">
 					<text><![CDATA[Initial Balance]]></text>
 				</element>
 				<element kind="textField" uuid="63ecb345-2207-44de-a3d8-e16f6ee43ecc" x="261" y="361" width="250" height="30" forecolor="#030303" fontName="Roboto" fontSize="10.0" italic="false" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[$P{CURRENCY_CODE} + " (" + $P{CURRENCY_SYMBOL} +")"]]></expression>
+					<expression><![CDATA[$P{CURRENCY}.code + " (" + $P{CURRENCY}.symbol +")"]]></expression>
 				</element>
 				<element kind="textField" uuid="e73dcaaa-bd1a-4f9e-82d6-515f2eb41a57" x="261" y="393" width="250" height="30" fontName="JetBrains Mono" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL}, $P{GENERAL_OVERVIEW}.initialBalance, $P{CURRENCY_DECIMAL_PLACES})]]></expression>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol, $P{GENERAL_OVERVIEW}.initialBalance, $P{CURRENCY}.decimalPlaces)]]></expression>
 				</element>
 				<element kind="textField" uuid="2df2fcb2-4864-4900-8f75-07a71a40e4f8" x="261" y="424" width="250" height="30" fontName="Jetbrains Mono" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL}, $P{GENERAL_OVERVIEW}.endingBalance, $P{CURRENCY_DECIMAL_PLACES})]]></expression>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol, $P{GENERAL_OVERVIEW}.endingBalance, $P{CURRENCY}.decimalPlaces)]]></expression>
 				</element>
 				<element kind="staticText" uuid="2fa1a6bb-b561-455a-8aa2-c8b2a5564386" x="31" y="424" width="90" height="30" fontName="Roboto" fontSize="10.0" hTextAlign="Left" vTextAlign="Middle">
 					<text><![CDATA[Ending Balance]]></text>
@@ -77,16 +81,16 @@
 					<text><![CDATA[Total Income]]></text>
 				</element>
 				<element kind="textField" uuid="b240662b-1447-4f81-a5c0-421ee106f1ef" x="261" y="456" width="250" height="30" fontName="Jetbrains Mono" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL}, $P{GENERAL_OVERVIEW}.income, $P{CURRENCY_DECIMAL_PLACES})]]></expression>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol, $P{GENERAL_OVERVIEW}.income, $P{CURRENCY}.decimalPlaces)]]></expression>
 				</element>
 				<element kind="textField" uuid="83743064-14aa-40c2-b9ee-79e722d13ac0" x="261" y="487" width="250" height="30" fontName="Jetbrains Mono" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL}, $P{GENERAL_OVERVIEW}.expense, $P{CURRENCY_DECIMAL_PLACES})]]></expression>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol, $P{GENERAL_OVERVIEW}.expense, $P{CURRENCY}.decimalPlaces)]]></expression>
 				</element>
 				<element kind="staticText" uuid="01e2c0e7-4099-476b-a6ba-57df7d1aa165" x="31" y="487" width="90" height="30" fontName="Roboto" fontSize="10.0" hTextAlign="Left" vTextAlign="Middle">
 					<text><![CDATA[Total Expense]]></text>
 				</element>
 				<element kind="textField" uuid="fd3e9447-19a3-476b-8269-1578a8ca242d" x="261" y="518" width="250" height="31" fontName="Jetbrains Mono" fontSize="10.0" hTextAlign="Right" vTextAlign="Middle">
-					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL}, $P{GENERAL_OVERVIEW}.netFlow, $P{CURRENCY_DECIMAL_PLACES})]]></expression>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol, $P{GENERAL_OVERVIEW}.netFlow, $P{CURRENCY}.decimalPlaces)]]></expression>
 				</element>
 				<element kind="staticText" uuid="8c07fc76-2c45-463b-888f-fa9d8d713cda" x="31" y="518" width="90" height="31" fontName="Roboto" fontSize="10.0" hTextAlign="Left" vTextAlign="Middle">
 					<text><![CDATA[Income + Expense]]></text>
@@ -152,16 +156,7 @@
 							<dataSourceExpression><![CDATA[$P{ASSET_ACCOUNTS}]]></dataSourceExpression>
 						</datasetRun>
 						<contents height="31" width="510">
-							<element kind="textField" uuid="0b5bfb48-b482-457b-bb0f-a51f87745783" mode="Opaque" x="0" y="0" width="60" height="30" backcolor="#FFFFFF" fontName="Jetbrains Mono" hTextAlign="Left" vTextAlign="Middle">
-								<paragraph leftIndent="8"/>
-								<expression><![CDATA[$F{id}]]></expression>
-								<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-								<box>
-									<pen lineWidth="0.0" lineColor="#CCCCCC"/>
-									<bottomPen lineWidth="1.25"/>
-								</box>
-							</element>
-							<element kind="textField" uuid="2f7e9b77-6ffe-40aa-b2c9-c16a095ea629" mode="Opaque" x="60" y="0" width="120" height="30" backcolor="#FFFFFF" fontName="Roboto" hTextAlign="Left" vTextAlign="Middle">
+							<element kind="textField" uuid="2f7e9b77-6ffe-40aa-b2c9-c16a095ea629" mode="Opaque" x="0" y="0" width="170" height="30" backcolor="#FFFFFF" fontName="Roboto" hTextAlign="Left" vTextAlign="Middle">
 								<paragraph leftIndent="8"/>
 								<expression><![CDATA[$F{name}]]></expression>
 								<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
@@ -169,10 +164,10 @@
 									<bottomPen lineWidth="1.25" lineColor="#CCCCCC"/>
 								</box>
 							</element>
-							<element kind="textField" uuid="c04fd4af-4711-4795-9457-f491a4ff3412" mode="Opaque" x="180" y="0" width="140" height="30" backcolor="#FFFFFF" fontName="Jetbrains Mono" blankWhenNull="false" hTextAlign="Left" vTextAlign="Middle">
-								<paragraph leftIndent="8"/>
-								<expression><![CDATA[$F{accountNumber} == null ? "" : $F{accountNumber}]]></expression>
-								<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+							<element kind="textField" uuid="c04fd4af-4711-4795-9457-f491a4ff3412" mode="Opaque" x="170" y="0" width="170" height="30" backcolor="#FFFFFF" fontName="Jetbrains Mono" blankWhenNull="false" hTextAlign="Right" vTextAlign="Middle">
+								<paragraph rightIndent="9"/>
+								<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($F{currencySymbol},$F{initialBalance},$F{currencyDecimalPlaces})]]></expression>
+								<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 								<box>
 									<pen lineWidth="1.25" lineColor="#CCCCCC"/>
 									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -181,10 +176,9 @@
 									<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 								</box>
 							</element>
-							<element kind="textField" uuid="fcd151ef-f41a-4e0c-af26-c9576ee59479" mode="Opaque" x="320" y="0" width="190" height="30" backcolor="#FFFFFF" fontName="Jetbrains Mono" blankWhenNull="true" hTextAlign="Right" vTextAlign="Middle">
-								<paragraph leftIndent="0" rightIndent="9"/>
+							<element kind="textField" uuid="fcd151ef-f41a-4e0c-af26-c9576ee59479" mode="Opaque" x="340" y="0" width="170" height="30" backcolor="#FFFFFF" fontName="Jetbrains Mono" blankWhenNull="true" hTextAlign="Right" vTextAlign="Middle">
+								<paragraph rightIndent="9"/>
 								<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($F{currencySymbol},$F{currentBalance},$F{currencyDecimalPlaces})]]></expression>
-								<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 								<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 								<box>
 									<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -197,29 +191,26 @@
 					</component>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</element>
-				<element kind="staticText" uuid="72d1d48c-0fca-4eae-8cd7-b4e3288677b2" mode="Opaque" x="10" y="50" width="60" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Left" vTextAlign="Middle">
+				<element kind="staticText" uuid="331f782e-d9ca-4d6f-a954-4d5c8919e73c" mode="Opaque" x="10" y="50" width="170" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Left" vTextAlign="Middle">
 					<paragraph leftIndent="8"/>
-					<text><![CDATA[ID]]></text>
+					<text><![CDATA[Account Name]]></text>
 					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 				</element>
-				<element kind="staticText" uuid="331f782e-d9ca-4d6f-a954-4d5c8919e73c" mode="Opaque" x="70" y="50" width="120" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Left" vTextAlign="Middle">
-					<paragraph leftIndent="8"/>
-					<text><![CDATA[NAME]]></text>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
-				</element>
-				<element kind="staticText" uuid="c8537b79-8dd9-4e67-9bfa-6c2b0ded54d7" mode="Opaque" x="190" y="50" width="140" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Left" vTextAlign="Middle">
-					<paragraph leftIndent="8"/>
-					<text><![CDATA[ACCOUNT NUMBER]]></text>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
-				</element>
-				<element kind="staticText" uuid="34d79468-f203-4799-adba-cb7adaa06d54" mode="Opaque" x="330" y="50" width="190" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Right" vTextAlign="Middle">
-					<paragraph leftIndent="0" rightIndent="8"/>
-					<text><![CDATA[ENDING BALANCE]]></text>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				<element kind="textField" uuid="de896a2e-c4fb-4260-a225-4f8fe8cda6a9" mode="Opaque" x="179" y="50" width="172" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Right" vTextAlign="Middle">
+					<paragraph rightIndent="8"/>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatDate($P{DATE_RANGE}.startDate)]]></expression>
 					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
+				</element>
+				<element kind="textField" uuid="8bc95759-baf3-4613-8c03-51a6727e8652" mode="Opaque" x="350" y="50" width="170" height="30" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Roboto" hTextAlign="Right" vTextAlign="Middle">
+					<paragraph rightIndent="8"/>
+					<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatDate($P{DATE_RANGE}.endDate)]]></expression>
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 				</element>
 			</band>
@@ -255,7 +246,7 @@
 											</box>
 										</element>
 										<element kind="textField" uuid="d7d4e49d-ee34-49e1-a56d-dd54aed0bc23" x="200" y="0" width="280" height="20" fontName="Jetbrains Mono" hTextAlign="Right" vTextAlign="Middle">
-											<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL},$F{difference},$P{CURRENCY_DECIMAL_PLACES})]]></expression>
+											<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol,$F{difference},$P{CURRENCY}.decimalPlaces)]]></expression>
 											<box>
 												<bottomPen lineWidth="1.0" lineColor="#CCCCCC"/>
 											</box>
@@ -304,7 +295,7 @@
 											</box>
 										</element>
 										<element kind="textField" uuid="d7d4e49d-ee34-49e1-a56d-dd54aed0bc23" x="200" y="0" width="280" height="20" fontName="Jetbrains Mono" hTextAlign="Right" vTextAlign="Middle">
-											<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY_SYMBOL},$F{difference},$P{CURRENCY_DECIMAL_PLACES})]]></expression>
+											<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($P{CURRENCY}.symbol,$F{difference},$P{CURRENCY}.decimalPlaces)]]></expression>
 											<box>
 												<bottomPen lineWidth="1.0" lineColor="#CCCCCC"/>
 											</box>
@@ -320,13 +311,13 @@
 	</group>
 	<background splitType="Stretch"/>
 	<title height="40" splitType="Stretch">
-		<element kind="staticText" uuid="ad00681d-cda2-416d-84e2-1f354ad00e81" x="50" y="0" width="130" height="40" fontName="Montserrat" fontSize="22.0" italic="false" bold="false" hTextAlign="Left" vTextAlign="Middle">
+		<element kind="staticText" uuid="ad00681d-cda2-416d-84e2-1f354ad00e81" x="50" y="0" width="130" height="40" fontName="Montserrat" fontSize="22.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Middle">
 			<paragraph leftIndent="8"/>
 			<text><![CDATA[Summary]]></text>
 			<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 			<propertyExpression name="net.sf.jasperreports.style.forecolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 		</element>
-		<element kind="staticText" uuid="f88af4e1-bb17-4370-b61d-f0394fcacacf" mode="Opaque" x="0" y="0" width="40" height="40" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Montserrat" fontSize="22.0" italic="false" bold="false" hTextAlign="Center" vTextAlign="Middle">
+		<element kind="staticText" uuid="f88af4e1-bb17-4370-b61d-f0394fcacacf" mode="Opaque" x="0" y="0" width="40" height="40" forecolor="#FFFFFF" backcolor="#AB3A38" fontName="Montserrat" fontSize="22.0" bold="false" italic="false" hTextAlign="Center" vTextAlign="Middle">
 			<text><![CDATA[1]]></text>
 			<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 		</element>
