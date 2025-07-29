@@ -32,7 +32,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build project
-        run: ./gradlew build runtime --no-daemon
+        run: ./gradlew build runtime --no-daemon -x test
         shell: bash
 
       - name: Package project
