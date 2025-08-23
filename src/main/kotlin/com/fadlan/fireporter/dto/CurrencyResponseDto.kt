@@ -26,5 +26,5 @@ data class CurrencyAttributesDto(
     val name: String,
     val code: String,
     val symbol: String,
-    val decimalPlaces: Int?=0
+    @SerialName("decimal_places") val decimalPlaces: Int?=0
 )

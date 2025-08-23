@@ -24,20 +24,18 @@ Fireporter does not offer pre-built binaries for MacOS old architecture. You mus
 
 ## ✅ TODO
 
-- [ ] Change from list to table on Transaction History
-- [ ] Separate Balance Left on Transaction History
-- [ ] Separate Chart Plot Line per Account
-- [ ] Multi-currency support (Major Update)
-- [ ] Budget
+- [ ] Add background color to table column header on transaction history
+- [ ] New gradle task to rename installers and zipped images.
+- [x] <s>Any-currency support (Major Update)</s>
 - [x] <s>Toggle attachments</s>
 - [x] <s>Add Logging</s>
 - [x] <s>Build to executable for distribution</s>
 - [x] <s>Github Action for building distributions</s>
 
 ## ⚠️ Important Notes
-- Currently, supports only Indonesian Rupiah (IDR). Multi-currency support is planned.
+- Currently, supports any currency but not multiple currencies. E.g. you can only have one currency in your Firefly III adminstration.
 - Release are available for `Windows x64`, `Linux x64`, and `MacOS (Apple Silicon)`. But only Windows version that has been tested.
-- - Fireporter only reads data from Firefly III via API and formats it into a PDF.
+- Fireporter only reads data from Firefly III via API and formats it into a PDF.
 - Tips: Store attachments as image instead of pdf for faster process. Fireporter will have to convert entire pages of PDF file to multiple image files before attaching it to generated report.
 
 ## 📄 Disclaimer
@@ -47,6 +45,21 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.2 - 2025/08/24
+- (BUG FIX) Fixed missing application icon on Linux
+- (BUG FIX) Fixed incorrect application name on Linux
+- (BUG FIX) Fixed truncation of application name and version in the UI
+- (BUG FIX) Fixed issue where inactive accounts were ignored instead of throwing `InactiveAccountException`
+- (BUG FIX) Fixed incorrect initial balance calculation
+- (BUG FIX) Fixed unresolved `decimalPlaces` when fetching currencies
+- (REFACTOR) Added and implement `safeRequest` utility for centralized HTTP error handling (throws `ClientErrorException` on 4xx errors and `ServerErrorException` on 5xx errors).
+
+### 2.0.1 - 2025/07/30
+- Supports for any currency. (But not multi-currency)
+- Change on transaction history table
+- Add unit tests
+- Bug fixes
+
 ### 1.0.3 - 2025/07/11
 - New: Added a GitHub Action for building and releasing distributions.
 - New: Implement up to service layers logging.

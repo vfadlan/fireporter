@@ -66,7 +66,7 @@ data class AccountAttributes(
     val bic: String? = null,
     @SerialName("virtual_balance") val virtualBalance: String? = null,
     @SerialName("native_virtual_balance") val nativeVirtualBalance: String? = null,
-    @SerialName("opening_balance") val openingBalance: String,
+    @SerialName("opening_balance") var openingBalance: String?=null,
     @SerialName("native_opening_balance") val nativeOpeningBalance: String?=null,
     @SerialName("opening_balance_date") val openingBalanceDate: String? = null,
     @SerialName("liability_type") val liabilityType: String? = null,

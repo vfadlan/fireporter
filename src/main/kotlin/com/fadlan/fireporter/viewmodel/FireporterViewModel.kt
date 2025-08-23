@@ -3,7 +3,9 @@ package com.fadlan.fireporter.viewmodel
 import com.fadlan.fireporter.dto.CurrencyAttributesDto
 import com.fadlan.fireporter.dto.SystemInfoResponse
 import com.fadlan.fireporter.model.Theme
+import com.fadlan.fireporter.network.ClientErrorException
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.ServerErrorException
 import com.fadlan.fireporter.repository.CurrencyRepository
 import com.fadlan.fireporter.service.DataCollectorService
 import com.fadlan.fireporter.service.JasperReportService
@@ -113,6 +115,26 @@ class FireporterViewModel(
                 "Unsupported Action",
                 "Multiple-Currency Transaction Detected",
                 "Fireporter does not support transactions involving multiple currencies for this action."
+            ).showAndWait()
+        } catch (exception: ClientErrorException) {
+            logger.error("Client Error: ${exception.message}")
+            progressTracker.sendMessage("Client Error. Update to latest Fireporter and try again.")
+            progressTracker.resetProgress()
+            IconizedAlert(
+                Alert.AlertType.ERROR,
+                "Client Error",
+                "Client Error, update to latest version of Fireporter and try again.",
+                "If this error persist, please report to Issue on the Github Repository (vFadlan011/fireporter). Detailed error available on logs."
+            ).showAndWait()
+        } catch (exception: ServerErrorException) {
+            logger.error("Firefly III Internal Server Error: ${exception.message}")
+            progressTracker.sendMessage("Firefly III Internal Server Error.")
+            progressTracker.resetProgress()
+            IconizedAlert(
+                Alert.AlertType.ERROR,
+                "Firefly III Internal Server Error",
+                "Firefly III Internal Server Error. Update your Firefly III to latest 6.x version and try again.",
+                "If this error persist, please report to Issue on the Github Repository (vFadlan011/fireporter). Detailed error available on logs."
             ).showAndWait()
         } catch (exception: Exception) {
             logger.error("Unknown exception: ${exception.message}")

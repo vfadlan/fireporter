@@ -5,6 +5,7 @@ import com.fadlan.fireporter.dto.AccountResponse
 import com.fadlan.fireporter.model.Account
 import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -18,16 +19,18 @@ class AccountRepository(
     private val cred: CredentialProvider,
 ) {
     private suspend fun fetchSinglePageAccounts(page: Int, date: LocalDate, type: String): AccountResponse {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "accounts")
-                parameters.append("type", type)
-                parameters.append("date", date.toString())
-                parameters.append("page", page.toString())
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "accounts")
+                    parameters.append("type", type)
+                    parameters.append("date", date.toString())
+                    parameters.append("page", page.toString())
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         return response.body()
     }
@@ -52,6 +55,7 @@ class AccountRepository(
         val accounts = mutableListOf<Account>()
         for (account in fetchedAccounts) {
             val attr = account.attributes
+            if (attr.openingBalance == null) attr.openingBalance = "0.00"
             accounts.add(
                 Account(
                     account.id,
@@ -64,7 +68,7 @@ class AccountRepository(
                     attr.currentBalanceDate,
                     attr.accountNumber,
                     attr.iban,
-                    attr.openingBalance.toBigDecimal(),
+                    attr.openingBalance!!.toBigDecimal(),
                     attr.openingBalanceDate
                 )
             )

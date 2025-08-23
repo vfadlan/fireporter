@@ -14,8 +14,8 @@ data class Attachment(
     val attachableId: String,
     val attachableType: String,
 
-    val md5: String,
-    val hash: String,
+    val md5: String?=null,
+    val hash: String?=null,
     var filename: String,
 
     val downloadUrl: String,

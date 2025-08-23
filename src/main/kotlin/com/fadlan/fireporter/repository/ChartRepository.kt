@@ -4,6 +4,7 @@ import com.fadlan.fireporter.dto.ChartDto
 import com.fadlan.fireporter.model.ChartEntry
 import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import com.fadlan.fireporter.utils.exceptions.UnusedCurrencyException
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -23,15 +24,17 @@ class ChartRepository(
     private val cred: CredentialProvider
 ) {
     private suspend fun fetchCharts(dateRange: DateRangeBoundaries): MutableList<ChartDto> {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "chart", "account", "overview")
-                parameters.append("start", dateRange.startDate.toString())
-                parameters.append("end", dateRange.endDate.toString())
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "chart", "account", "overview")
+                    parameters.append("start", dateRange.startDate.toString())
+                    parameters.append("end", dateRange.endDate.toString())
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         val chart: MutableList<ChartDto> = response.body()
         return chart

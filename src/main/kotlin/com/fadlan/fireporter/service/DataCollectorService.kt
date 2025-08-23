@@ -3,11 +3,13 @@ package com.fadlan.fireporter.service
 import com.fadlan.fireporter.dto.SystemInfoResponse
 import com.fadlan.fireporter.model.*
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import com.fadlan.fireporter.repository.*
 import com.fadlan.fireporter.utils.FxProgressTracker
 import com.fadlan.fireporter.utils.exceptions.IllegalDateRangeException
 import com.fadlan.fireporter.utils.exceptions.InactiveAccountException
 import com.fadlan.fireporter.utils.getOrZero
+import com.fadlan.fireporter.utils.prettyPrint
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -45,6 +47,7 @@ class DataCollectorService(
         logger.info("Collecting accounts and charts data...")
         progressTracker.report("Collecting accounts and charts data")
         accounts = accountRepository.getAssetAccounts(dateRange)
+        if (!accountRepository.hasActiveAccountInRange(dateRange, accounts)) throw InactiveAccountException()
     }
 
     private suspend fun collectData(dateRange: DateRangeBoundaries, withAttachment: Boolean) {
@@ -125,10 +128,12 @@ class DataCollectorService(
     }
 
     suspend fun requestApiInfo(host: String, token: String): HttpResponse {
-        val response: HttpResponse = ktor.request(host) {
-            url { appendPathSegments("api", "v1", "about") }
-            headers.append(HttpHeaders.Authorization, "Bearer $token")
-            method = HttpMethod.Get
+        val response: HttpResponse = safeRequest {
+            ktor.request(host) {
+                url { appendPathSegments("api", "v1", "about") }
+                headers.append(HttpHeaders.Authorization, "Bearer $token")
+                method = HttpMethod.Get
+            }
         }
         return response
     }

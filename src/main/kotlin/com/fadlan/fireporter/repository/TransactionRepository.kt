@@ -7,6 +7,7 @@ import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.model.GeneralOverview
 import com.fadlan.fireporter.model.TransactionJournal
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import com.fadlan.fireporter.utils.exceptions.MultipleCurrencyException
 import com.fadlan.fireporter.utils.getOrZero
 import io.ktor.client.*
@@ -25,17 +26,19 @@ class TransactionRepository(
     private val attachmentRepository: AttachmentRepository
 ) {
     private suspend fun fetchSinglePageTransactions(page: Int, dateRange: DateRangeBoundaries): TransactionResponse {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "transactions")
-                parameters.append("start", dateRange.startDate.toString())
-                parameters.append("end", dateRange.endDate.toString())
-                parameters.append("page", page.toString())
-                parameters.append("type", "all")
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "transactions")
+                    parameters.append("start", dateRange.startDate.toString())
+                    parameters.append("end", dateRange.endDate.toString())
+                    parameters.append("page", page.toString())
+                    parameters.append("type", "all")
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         return response.body()
     }

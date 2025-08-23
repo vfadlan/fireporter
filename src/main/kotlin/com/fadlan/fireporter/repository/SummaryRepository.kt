@@ -8,6 +8,7 @@ import com.fadlan.fireporter.model.GeneralOverview
 import com.fadlan.fireporter.model.GroupBy
 import com.fadlan.fireporter.model.TimeOfDayBoundary
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import com.fadlan.fireporter.utils.getOrZero
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -81,15 +82,17 @@ class SummaryRepository(
     }
 
     suspend fun fetchSummaryBasic(dateRange: DateRangeBoundaries): HashMap<String, BasicSummaryDto> {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "summary", "basic")
-                parameters.append("start", dateRange.startDate.toString())
-                parameters.append("end", dateRange.endDate.toString())
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "summary", "basic")
+                    parameters.append("start", dateRange.startDate.toString())
+                    parameters.append("end", dateRange.endDate.toString())
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         val summaryResponse: HashMap<String, BasicSummaryDto> = response.body()
         return summaryResponse
@@ -137,9 +140,11 @@ class SummaryRepository(
             balances[key] = balances.getOrZero(key) + account.attributes.currentBalance.toBigDecimal()
             if (timeOfDay == TimeOfDayBoundary.START) balances[key] = balances.getOrZero(key) - cashFlows.getOrZero(key)
 
-            if (account.attributes.openingBalanceDate!=null && groupBy==GroupBy.CURRENCY_CODE) {
+            if (account.attributes.openingBalanceDate!=null && account.attributes.openingBalance!=null && groupBy==GroupBy.CURRENCY_CODE) {
                 val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate,textDateFormat)
-                if (openingBalanceDate == date) balances[key] = balances.getOrZero(key) - account.attributes.openingBalance.toBigDecimal()
+                if (openingBalanceDate == date) {
+                    balances[key] = balances.getOrZero(key) - account.attributes.openingBalance!!.toBigDecimal()
+                }
             }
         }
 
@@ -152,14 +157,14 @@ class SummaryRepository(
         val openingBalances = hashMapOf<String, BigDecimal>()
 
         for (account in fetchedAccounts) {
-            if (account.attributes.openingBalanceDate!=null) {
+            if (account.attributes.openingBalanceDate!=null && account.attributes.openingBalance!=null) {
                 val key = account.attributes.currencyCode?:"UNKNOWN"
                 val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate,textDateFormat)
                 if (
                     !openingBalanceDate.isBefore(dateRange.startDate) &&
                     openingBalanceDate.isBefore(dateRange.endDate)
                 ) {
-                    openingBalances[key] = openingBalances.getOrZero(key) + account.attributes.openingBalance.toBigDecimal()
+                    openingBalances[key] = openingBalances.getOrZero(key) + account.attributes.openingBalance!!.toBigDecimal()
                 }
             }
         }
@@ -169,7 +174,7 @@ class SummaryRepository(
 
     suspend fun getFullOverview(dateRange: DateRangeBoundaries): HashMap<String, GeneralOverview> {
         val fetchedSummary = fetchSummaryBasic(dateRange)
-        val initialAssets = getAssetBalanceAtDate(dateRange.startDate.minusDays(1), GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
+        val initialAssets = getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
         val cashFlows = calculateCashFlow(dateRange, GroupBy.CURRENCY_CODE)
         val openingBalances = getOpeningBalanceByCurrency(dateRange)
 

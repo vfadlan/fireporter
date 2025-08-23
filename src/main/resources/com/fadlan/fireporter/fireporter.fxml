@@ -15,26 +15,33 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="560.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/21.0.7" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fadlan.fireporter.controller.FireporterController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="560.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.fadlan.fireporter.controller.FireporterController">
    <children>
       <VBox fx:id="vBoxBase" onMouseDragged="#onMouseDragged" onMousePressed="#onMousePressed" prefHeight="600.0" prefWidth="536.0" style="-fx-background-color: white; -fx-background-radius: 12px;">
          <children>
-            <HBox alignment="BASELINE_LEFT" prefHeight="34.0" prefWidth="492.0" spacing="8.0">
+            <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="492.0" spacing="8.0">
                <children>
-                  <Label text="Fireporter">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="versionLabel" text="v0.33.0" textFill="#8d8d8d" />
-                  <Button fx:id="aboutBtn" mnemonicParsing="false" onAction="#aboutBtnOnAction" style="-fx-cursor: hand;" text="?">
-                     <styleClass>
-                        <String fx:value="flat" />
-                        <String fx:value="rounded" />
-                        <String fx:value="accent" />
-                     </styleClass>
-                  </Button>
-                  <Pane prefHeight="26.0" prefWidth="245.0" />
+                  <HBox alignment="CENTER_LEFT" prefHeight="31.0" prefWidth="455.0">
+                     <children>
+                        <HBox alignment="BASELINE_LEFT" prefHeight="30.0" prefWidth="184.0" spacing="8.0">
+                           <children>
+                              <Label text="Fireporter">
+                                 <font>
+                                    <Font size="24.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="versionLabel" text="v0.33.0" textFill="#8d8d8d" />
+                           </children>
+                        </HBox>
+                        <Button fx:id="aboutBtn" mnemonicParsing="false" onAction="#aboutBtnOnAction" style="-fx-cursor: hand;" text="?">
+                           <styleClass>
+                              <String fx:value="flat" />
+                              <String fx:value="rounded" />
+                              <String fx:value="accent" />
+                           </styleClass>
+                        </Button>
+                     </children>
+                  </HBox>
                   <Button fx:id="closeBtn" mnemonicParsing="false" onAction="#onCloseBtnClick" style="-fx-cursor: hand;" text="X">
                      <styleClass>
                         <String fx:value="rounded" />
