@@ -25,12 +25,12 @@ Fireporter does not offer pre-built binaries for MacOS old architecture. You mus
 ## ✅ TODO
 
 - [ ] Add background color to table column header on transaction history
-- [ ] New gradle task to rename installers and zipped images.
 - [x] <s>Any-currency support (Major Update)</s>
 - [x] <s>Toggle attachments</s>
 - [x] <s>Add Logging</s>
 - [x] <s>Build to executable for distribution</s>
 - [x] <s>Github Action for building distributions</s>
+- [x] New gradle task to rename installers and zipped images.
 
 ## ⚠️ Important Notes
 - Currently, supports any currency but not multiple currencies. E.g. you can only have one currency in your Firefly III adminstration.
@@ -47,7 +47,7 @@ This project is licensed under the [GNU AGPL v3.0](LICENSE).
 ## 📌 Changelog
 ### 2.0.2 - 2025/08/24
 - (BUG FIX) Fixed missing application icon on Linux
-- (BUG FIX) Fixed incorrect application name on Linux
+- (BUG FIX) Fixed incorrect application and installer name on Linux
 - (BUG FIX) Fixed truncation of application name and version in the UI
 - (BUG FIX) Fixed issue where inactive accounts were ignored instead of throwing `InactiveAccountException`
 - (BUG FIX) Fixed incorrect initial balance calculation

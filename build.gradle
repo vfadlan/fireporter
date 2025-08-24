@@ -258,7 +258,7 @@ tasks.register('packImage') {
             def imageDir = file("$buildDir/distributions/image/Fireporter")
             ant.zip(destfile: "${outputDir}/${archiveFileName}", basedir: imageDir)
         } else if (currentOs.linux) {
-            def imageDir = file("$buildDir/distributions/image/fireporter")
+            def imageDir = file("$buildDir/distributions/image/Fireporter")
             ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
                 tarfileset(dir: imageDir)
             }
@@ -309,10 +309,15 @@ if (currentOs.linux) {
                 rename { "Fireporter.png" }
             }
 
+            def installerName = "fireporter_linux-${System.getProperty("os.arch")}_v${project.version}.deb"
+
             // Rebuild package
-            def fixedDeb = new File(debFile.parent, debFile.name)
+            def fixedDeb = new File(debFile.parent, installerName)
             exec {
                 commandLine "dpkg-deb", "-b", tmpDir.absolutePath, fixedDeb.absolutePath
+            }
+            if (debFile.exists()) {
+                debFile.delete()
             }
 
             println "Fixed package created at: $fixedDeb"
