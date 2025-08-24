@@ -325,6 +325,43 @@ if (currentOs.linux) {
     }
 }
 
+
+tasks.register("renameInstaller") {
+    dependsOn("jpackage")
+    doLast {
+        def distDir = file("$buildDir/distributions/installer")
+        if (!distDir.exists()) {
+            throw new GradleException("Installer directory not found: $distDir")
+        }
+
+        def installerFile = distDir.listFiles()?.find { it.isFile() }
+        if (installerFile == null) {
+            throw new GradleException("No installer file found in $distDir")
+        }
+
+        def arch = System.getProperty("os.arch")
+        def ext  = installerFile.name.tokenize('.').last()
+        def os   = org.gradle.internal.os.OperatingSystem.current()
+        def newFileName
+
+        if (os.isWindows()) {
+            newFileName = "Fireporter_Win-${arch}_v${project.version}.${ext}"
+        } else if (os.isLinux()) {
+            newFileName = "Fireporter_Linux-${arch}_v${project.version}.${ext}"
+        } else if (os.isMacOsX()) {
+            newFileName = "Fireporter_MacOS-${arch}_v${project.version}.${ext}"
+        } else {
+            newFileName = installerFile.name
+        }
+
+        def newFile = new File(installerFile.parentFile, newFileName)
+        println "Renaming ${installerFile.name} -> ${newFile.name}"
+        if (!installerFile.renameTo(newFile)) {
+            throw new GradleException("Failed to rename ${installerFile} to ${newFile}")
+        }
+    }
+}
+
 jar {
     manifest {
         attributes(

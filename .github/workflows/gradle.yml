@@ -44,6 +44,10 @@ jobs:
         run: ./gradlew patchDebIcon --no-daemon
         shell: bash
 
+      - name: Rename installer file
+        run: ./gradlew renameInstaller
+        shell: bash
+
       - name: Compress app image
         run: ./gradlew packImage --no-daemon
         shell: bash
