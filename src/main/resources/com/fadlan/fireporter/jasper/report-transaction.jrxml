@@ -17,8 +17,10 @@
 	</style>
 	<style name="Table_CH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
-			<topPen lineWidth="0.5" lineColor="#242424"/>
-			<bottomPen lineWidth="0.5" lineColor="#242424"/>
+			<topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+			<bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
 		</box>
 	</style>
 	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
@@ -41,14 +43,18 @@
 	</style>
 	<style name="Table_CH_FIRST" mode="Opaque" backcolor="#FFFFFF">
 		<box>
-			<topPen lineWidth="0.5" lineColor="#242424"/>
-			<bottomPen lineWidth="0.5" lineColor="#242424"/>
+            <topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
 		</box>
 	</style>
 	<style name="Table_CH_LAST" mode="Opaque" backcolor="#FFFFFF">
 		<box>
-			<topPen lineWidth="0.5" lineColor="#242424"/>
-			<bottomPen lineWidth="0.5" lineColor="#242424"/>
+            <topPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <bottomPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <leftPen lineWidth="0.5" lineColor="#FFFFFF"/>
+            <rightPen lineWidth="0.5" lineColor="#FFFFFF"/>
 		</box>
 	</style>
 	<style name="Table_TD_FIRST" mode="Opaque" backcolor="#FFFFFF">

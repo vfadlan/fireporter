@@ -9,6 +9,7 @@ import com.fadlan.fireporter.service.AttachmentService
 import com.fadlan.fireporter.service.DataCollectorService
 import com.fadlan.fireporter.service.JasperReportService
 import com.fadlan.fireporter.utils.DateRangeResolver
+import com.fadlan.fireporter.utils.DynamicTableStyler
 import com.fadlan.fireporter.utils.FxProgressTracker
 import com.fadlan.fireporter.viewmodel.FireporterViewModel
 import io.ktor.client.*
@@ -115,10 +116,13 @@ class FireporterApp : Application() {
                 )
             }
 
+            single { DynamicTableStyler() }
+
             includes(classLoggerModule<JasperReportService>())
             single {
                 JasperReportService(
-                    get(named(JasperReportService::class.qualifiedName!!))
+                    get(named(JasperReportService::class.qualifiedName!!)),
+                    get<DynamicTableStyler>()
                 )
             }
 

@@ -45,6 +45,9 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.3 - 2025/08/25
+- (FEATURE) Added theme-based background colors to column headers in Transaction History
+
 ### 2.0.2 - 2025/08/24
 - (BUG FIX) Fixed missing application icon on Linux
 - (BUG FIX) Fixed incorrect application and installer name on Linux

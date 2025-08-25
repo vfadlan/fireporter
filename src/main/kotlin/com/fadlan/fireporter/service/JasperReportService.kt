@@ -4,6 +4,7 @@ import com.fadlan.fireporter.FireporterApp
 import com.fadlan.fireporter.model.ChartEntryWrapper
 import com.fadlan.fireporter.model.ReportData
 import com.fadlan.fireporter.model.Theme
+import com.fadlan.fireporter.utils.DynamicTableStyler
 import com.fadlan.fireporter.utils.getProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,14 +20,15 @@ import javax.imageio.ImageIO
 import kotlin.collections.HashMap
 
 class JasperReportService(
-    private val logger: Logger
+    private val logger: Logger,
+    private val tableStyler: DynamicTableStyler
 ) {
     private val compiledReports = mutableMapOf<String, JasperReport>()
+    private val compiledTransactionReports = mutableMapOf<String, JasperReport>()
 
     private val jrxmlFiles = listOf(
         "report-book-cover.jrxml",
         "report-summary.jrxml",
-        "report-transaction.jrxml",
         "report-attachment.jrxml",
         "report-disclaimer.jrxml",
         "book.jrxml",
@@ -37,32 +39,56 @@ class JasperReportService(
 
         logger.info("Compiling jasper .jrxml files...")
         for (jrxmlName in jrxmlFiles) {
-            val resourcePath = "/com/fadlan/fireporter/jasper/$jrxmlName"
-            val stream = FireporterApp::class.java.getResourceAsStream(resourcePath)
-                ?: throw IllegalArgumentException("Missing jrxml resource: $resourcePath")
-            val design = JRXmlLoader.load(stream)
-
-            try {
-                design.language = "groovy"
-                val report = JasperCompileManager.compileReport(design)
-                val reportKey = jrxmlName.removeSuffix(".jrxml")
-                compiledReports[reportKey] = report
-            } catch (e: JRException) {
-                logger.error("Failed to compile $jrxmlName: ${e.message}")
-                throw IllegalStateException("Failed to compile: $jrxmlName: ${e.message}", e)
-            }
+            val reportKey = jrxmlName.removeSuffix(".jrxml")
+            compiledReports[reportKey] = compileReport(jrxmlName, "#000000")
         }
         logger.info("${compiledReports.size} of ${jrxmlFiles.size} .jrxml files compiled successfully.")
+    }
+
+    private fun compileReport(jrxmlName: String, themeColorHex: String): JasperReport {
+        val resourcePath = "/com/fadlan/fireporter/jasper/$jrxmlName"
+        val stream = FireporterApp::class.java.getResourceAsStream(resourcePath)
+            ?: throw IllegalArgumentException("Missing jrxml resource: $resourcePath")
+        val design = JRXmlLoader.load(stream)
+
+        try {
+            design.language = "groovy"
+
+            if (jrxmlName == "report-transaction.jrxml") {
+                tableStyler.applyDynamicHeaderStyling(design, themeColorHex)
+            }
+
+            val report = JasperCompileManager.compileReport(design)
+            return report
+        } catch (e: JRException) {
+            logger.error("Failed to compile $jrxmlName: ${e.message}")
+            throw IllegalStateException("Failed to compile: $jrxmlName: ${e.message}", e)
+        }
     }
 
     private fun loadCompiledReport(name: String): JasperReport {
         return compiledReports[name]
             ?.apply { whenNoDataType = WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL }
             ?: throw IllegalArgumentException("Compiled report not found: $name")
+   }
+
+    private fun loadCompiledTransactionReport(theme: Theme): JasperReport {
+        val themeKey = "trans-report-${theme.name}"
+
+        if (compiledTransactionReports.containsKey(themeKey)) {
+            return compiledTransactionReports[themeKey]
+                ?.apply { whenNoDataType = WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL }
+                ?: throw IllegalArgumentException("Compiled report not found: $themeKey")
+        }
+
+        compiledTransactionReports[themeKey] = compileReport("report-transaction.jrxml", theme.darkColorHex)
+
+        return compiledTransactionReports[themeKey]
+            ?.apply { whenNoDataType = WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL }
+            ?: throw IllegalArgumentException("Compiled report not found: $themeKey")
     }
 
-    private fun loadCoverImage(theme: Theme): BufferedImage {
-        val resourcePath = "/com/fadlan/fireporter/cover-images/report-cover_${theme.name}.png"
+    private fun loadCoverImage(theme: Theme): BufferedImage {        val resourcePath = "/com/fadlan/fireporter/cover-images/report-cover_${theme.name}.png"
         val coverStream: InputStream = FireporterApp::class.java.getResourceAsStream(resourcePath)
             ?: throw IllegalArgumentException("Error: Report cover image not found for theme ${theme.name} at path: $resourcePath")
 
@@ -81,7 +107,7 @@ class JasperReportService(
             params.loadCommonParameters(data, theme)
             params.loadCover(loadCoverImage(theme), loadCompiledReport("report-book-cover"))
             params.loadSummary(data, loadCompiledReport("report-summary"))
-            params.loadTransactionHistory(data, loadCompiledReport("report-transaction"))
+            params.loadTransactionHistory(data, loadCompiledTransactionReport(theme))
             params.loadAttachments(data, loadCompiledReport("report-attachment"))
             params.loadSysInfo(data)
 
