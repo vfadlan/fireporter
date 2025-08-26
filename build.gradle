@@ -309,7 +309,7 @@ if (currentOs.linux) {
                 rename { "Fireporter.png" }
             }
 
-            def installerName = "fireporter_linux-${System.getProperty("os.arch")}_v${project.version}.deb"
+            def installerName = "Fireporter_linux-${System.getProperty("os.arch")}_v${project.version}.deb"
 
             // Rebuild package
             def fixedDeb = new File(debFile.parent, installerName)
