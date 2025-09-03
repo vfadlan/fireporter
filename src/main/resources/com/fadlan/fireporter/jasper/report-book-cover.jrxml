@@ -28,7 +28,7 @@
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_COLOR}]]></propertyExpression>
 					<pen lineWidth="0.0"/>
 				</element>
-				<element kind="textField" uuid="5bb49d37-ea51-4ca3-a18a-38cb0e66e0ee" positionType="Float" mode="Opaque" x="230" y="630" width="370" height="64" forecolor="#FFFFFF" backcolor="#911411" fontName="Montserrat" fontSize="45.0" linkType="None" linkTarget="Self" underline="false" italic="false" bold="false" hTextAlign="Left" vTextAlign="Bottom">
+				<element kind="textField" uuid="5bb49d37-ea51-4ca3-a18a-38cb0e66e0ee" positionType="Float" mode="Opaque" x="230" y="630" width="370" height="64" forecolor="#FFFFFF" backcolor="#911411" fontName="Montserrat" fontSize="45.0" linkType="None" linkTarget="Self" bold="false" italic="false" underline="false" hTextAlign="Left" vTextAlign="Bottom">
 					<expression><![CDATA[$P{REPORT_TITLE}]]></expression>
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 					<box leftPadding="20" rightPadding="20"/>
@@ -37,6 +37,9 @@
 					<expression><![CDATA["Financial Report"]]></expression>
 					<propertyExpression name="net.sf.jasperreports.style.backcolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 					<box leftPadding="20" rightPadding="20"/>
+				</element>
+				<element kind="textField" uuid="170817b0-ae4a-4a3d-91c3-70b70a069cbd" mode="Transparent" x="0" y="0" width="20" height="20" forecolor="rgba(0, 0, 0, 0.0)" bookmarkLevel="1">
+					<anchorNameExpression><![CDATA['Cover Page']]></anchorNameExpression>
 				</element>
 				<element kind="textField" uuid="38fc9afd-edcb-42f3-b6bc-cd258f6507b3" x="250" y="730" width="234" height="20" fontName="Roboto" fontSize="12.0" hTextAlign="Left" vTextAlign="Middle">
 					<expression><![CDATA["Printed on " + DATEFORMAT(TODAY( ),"E MMM d, yyyy")]]></expression>

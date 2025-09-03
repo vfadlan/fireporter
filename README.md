@@ -47,6 +47,8 @@ This project is licensed under the [GNU AGPL v3.0](LICENSE).
 ## 📌 Changelog
 ### 2.0.4 - 2025/09/03
 - (REFACTOR) Improve transaction report table layout
+- (REFACTOR) Improve column header choice of words
+- (FEATURE) Add bookmarks to headings
 
 ### 2.0.3 - 2025/08/26
 - (FEATURE) Added theme-based background colors to column headers in Transaction History

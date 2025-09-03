@@ -108,8 +108,8 @@
 	<parameter name="WITH_ATTACHMENT" class="java.lang.Boolean"/>
 	<group name="Transactions">
 		<groupHeader>
-			<band height="160">
-				<element kind="component" uuid="0798f548-7a34-4724-a438-9623520d282d" x="0" y="20" width="770" height="120">
+			<band height="150">
+				<element kind="component" uuid="0798f548-7a34-4724-a438-9623520d282d" x="0" y="20" width="770" height="110">
 					<component kind="table">
 						<datasetRun uuid="f6b42c02-f033-4c2d-bde9-2ca34553090f" subDataset="TRANSACTION_HISTORY">
 							<parametersMapExpression><![CDATA[$P{REPORT_PARAMETERS_MAP}]]></parametersMapExpression>
@@ -123,8 +123,8 @@
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 								</element>
 							</columnHeader>
-							<detailCell height="60" style="Table_TD_FIRST">
-								<element kind="textField" uuid="3aebf507-93c1-459c-85d1-c8964639746f" stretchType="ElementGroupHeight" x="0" y="0" width="80" height="60" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Middle">
+							<detailCell height="50" style="Table_TD_FIRST">
+								<element kind="textField" uuid="3aebf507-93c1-459c-85d1-c8964639746f" stretchType="ElementGroupHeight" x="0" y="0" width="80" height="50" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Middle">
 									<paragraph rightIndent="8"/>
 									<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatDate($F{datetime}.toLocalDate()) + "\n" + com.fadlan.fireporter.utils.ReportUtils.formatTime($F{datetime}.toLocalTime())]]></expression>
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -142,8 +142,8 @@
 									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 								</element>
 							</columnHeader>
-							<detailCell height="60" style="Table_TD">
-								<element kind="textField" uuid="f403c0eb-200b-4fc9-81cb-fc457e88cc78" stretchType="ElementGroupHeight" x="0" y="0" width="270" height="30" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Left" vTextAlign="Bottom">
+							<detailCell height="50" style="Table_TD">
+								<element kind="textField" uuid="f403c0eb-200b-4fc9-81cb-fc457e88cc78" stretchType="ElementGroupHeight" x="0" y="0" width="270" height="25" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Left" vTextAlign="Bottom">
 									<paragraph leftIndent="8"/>
 									<expression><![CDATA[$F{description} ]]></expression>
 									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
@@ -152,7 +152,7 @@
 									<property name="com.jaspersoft.studio.unit.height" value="px"/>
 									<box bottomPadding="2"/>
 								</element>
-								<element kind="textField" uuid="682343b2-d42c-4f8f-812c-4a963842ff78" stretchType="ElementGroupHeight" x="0" y="30" width="270" height="30" forecolor="#505050" fontName="Roboto" textAdjust="StretchHeight" italic="true" hTextAlign="Left" vTextAlign="Top">
+								<element kind="textField" uuid="682343b2-d42c-4f8f-812c-4a963842ff78" stretchType="ElementGroupHeight" x="0" y="25" width="270" height="25" forecolor="#505050" fontName="Roboto" textAdjust="StretchHeight" italic="true" hTextAlign="Left" vTextAlign="Top">
 									<paragraph leftIndent="8"/>
 									<expression><![CDATA[$F{type}]]></expression>
 									<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
@@ -177,8 +177,8 @@
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 								</element>
 							</columnHeader>
-							<detailCell height="60" style="Table_TD">
-								<element kind="textField" uuid="098e0bb2-4f86-4c54-a0f4-c88243a0c316" stretchType="ElementGroupHeight" x="0" y="0" width="130" height="60" fontName="Jetbrains Mono" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Middle">
+							<detailCell height="50" style="Table_TD">
+								<element kind="textField" uuid="098e0bb2-4f86-4c54-a0f4-c88243a0c316" stretchType="ElementGroupHeight" x="0" y="0" width="130" height="50" fontName="Jetbrains Mono" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Middle">
 									<paragraph rightIndent="8"/>
 									<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($F{currencySymbol}, $F{amount}, $F{currencyDecimalPlaces})]]></expression>
 									<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -191,7 +191,7 @@
 						<column kind="group" uuid="6376ea7e-2ca5-40b1-ad29-59436c22674f" width="240">
 							<columnHeader height="30" rowSpan="1" style="Table_CH">
 								<element kind="staticText" uuid="ffef3bde-0e86-4ffa-b029-b1121ab2c3cf" x="0" y="0" width="240" height="30" forecolor="#000000" fontName="Roboto" hTextAlign="Center" vTextAlign="Middle">
-									<text><![CDATA[Account Balance Left]]></text>
+									<text><![CDATA[Account Ending Balance]]></text>
 								</element>
 							</columnHeader>
 							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [2]"/>
@@ -203,8 +203,8 @@
 										<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 									</element>
 								</columnHeader>
-								<detailCell height="60" style="Table_TD">
-									<element kind="textField" uuid="f9ccc408-8ee7-43c4-9f3c-96805d0d7b30" stretchType="ElementGroupHeight" x="0" y="0" width="120" height="30" fontName="Jetbrains Mono" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Bottom">
+								<detailCell height="50" style="Table_TD">
+									<element kind="textField" uuid="f9ccc408-8ee7-43c4-9f3c-96805d0d7b30" stretchType="ElementGroupHeight" x="0" y="0" width="120" height="25" fontName="Jetbrains Mono" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Bottom">
 										<paragraph rightIndent="8"/>
 										<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($F{currencySymbol}, $F{sourceBalanceLeft}, $F{currencyDecimalPlaces})]]></expression>
 										<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -212,7 +212,7 @@
 										<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 										<box bottomPadding="4"/>
 									</element>
-									<element kind="textField" uuid="04fb252e-099a-483d-8cb2-fc84d925bbef" stretchType="ElementGroupHeight" x="0" y="30" width="120" height="30" forecolor="#505050" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Top">
+									<element kind="textField" uuid="04fb252e-099a-483d-8cb2-fc84d925bbef" stretchType="ElementGroupHeight" x="0" y="25" width="120" height="25" forecolor="#505050" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Top">
 										<paragraph rightIndent="8"/>
 										<expression><![CDATA["(" + $F{sourceName} + ")"]]></expression>
 										<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -233,12 +233,12 @@
 								<columnHeader height="30" rowSpan="1" style="Table_CH">
 									<element kind="staticText" uuid="17dcf038-c258-430a-ad36-c9725f61e250" x="0" y="0" width="120" height="30" forecolor="#000000" fontName="Roboto" hTextAlign="Right" vTextAlign="Middle">
 										<paragraph rightIndent="8"/>
-										<text><![CDATA[Dest.]]></text>
+										<text><![CDATA[Destination]]></text>
 										<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
 									</element>
 								</columnHeader>
-								<detailCell height="60" style="Table_TD">
-									<element kind="textField" uuid="23ab6767-b49b-4246-90c4-12f89f58825a" stretchType="ElementGroupHeight" x="0" y="0" width="120" height="30" fontName="Jetbrains Mono" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Bottom">
+								<detailCell height="50" style="Table_TD">
+									<element kind="textField" uuid="23ab6767-b49b-4246-90c4-12f89f58825a" stretchType="ElementGroupHeight" x="0" y="0" width="120" height="25" fontName="Jetbrains Mono" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Bottom">
 										<paragraph rightIndent="8"/>
 										<expression><![CDATA[com.fadlan.fireporter.utils.ReportUtils.formatCurrency($F{currencySymbol}, $F{destinationBalanceLeft}, $F{currencyDecimalPlaces})]]></expression>
 										<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -246,7 +246,7 @@
 										<property name="net.sf.jasperreports.print.keep.full.text" value="true"/>
 										<box bottomPadding="4"/>
 									</element>
-									<element kind="textField" uuid="d6552c62-1527-4ff4-84e9-76bc0b37c83a" stretchType="ElementGroupHeight" x="0" y="30" width="120" height="30" forecolor="#505050" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Top">
+									<element kind="textField" uuid="d6552c62-1527-4ff4-84e9-76bc0b37c83a" stretchType="ElementGroupHeight" x="0" y="25" width="120" height="25" forecolor="#505050" fontName="Roboto" textAdjust="StretchHeight" hTextAlign="Right" vTextAlign="Top">
 										<paragraph rightIndent="8"/>
 										<expression><![CDATA["(" + $F{destinationName} + ")"]]></expression>
 										<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
@@ -270,8 +270,8 @@
 									<text><![CDATA[Attc.]]></text>
 								</element>
 							</columnHeader>
-							<detailCell height="60" style="Table_TD">
-								<element kind="textField" uuid="9ff26068-1666-46ef-bdf0-55970f5c7f29" x="0" y="0" width="50" height="60" fontName="Roboto" linkType="LocalAnchor" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
+							<detailCell height="50" style="Table_TD">
+								<element kind="textField" uuid="9ff26068-1666-46ef-bdf0-55970f5c7f29" x="0" y="0" width="50" height="50" fontName="Roboto" linkType="LocalAnchor" linkTarget="Self" hTextAlign="Center" vTextAlign="Middle">
 									<printWhenExpression><![CDATA[$F{hasAttachments} && $P{WITH_ATTACHMENT}]]></printWhenExpression>
 									<expression><![CDATA["View"]]></expression>
 									<anchorNameExpression><![CDATA[$F{elementId}]]></anchorNameExpression>
@@ -297,9 +297,10 @@
 		</groupHeader>
 	</group>
 	<title height="60" splitType="Stretch">
-		<element kind="staticText" uuid="ad00681d-cda2-416d-84e2-1f354ad00e81" x="50" y="0" width="240" height="40" fontName="Montserrat" fontSize="22.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Middle">
+		<element kind="textField" uuid="ad00681d-cda2-416d-84e2-1f354ad00e81" x="50" y="0" width="240" height="40" fontName="Montserrat" fontSize="22.0" bookmarkLevel="1" bold="false" italic="false" hTextAlign="Left" vTextAlign="Middle">
 			<paragraph leftIndent="8"/>
-			<text><![CDATA[Transaction History]]></text>
+			<expression><![CDATA["Transaction History"]]></expression>
+			<anchorNameExpression><![CDATA['2. Transaction History']]></anchorNameExpression>
 			<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 			<propertyExpression name="net.sf.jasperreports.style.forecolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 		</element>
