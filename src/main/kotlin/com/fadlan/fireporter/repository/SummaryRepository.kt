@@ -106,17 +106,10 @@ class SummaryRepository(
             for (journal in transaction.attributes.transactions) {
                 val amount = journal.amount.toBigDecimal()
                 if (groupBy == GroupBy.ACCOUNT) {
-                    cashFlows[journal.sourceId] = cashFlows.getOrZero(journal.sourceId) - amount
+                    cashFlows[journal.sourceId] = cashFlows.getOrZero(journal.sourceId) + amount
                     cashFlows[journal.destinationId] = cashFlows.getOrZero(journal.destinationId) + amount
                 } else if (groupBy == GroupBy.CURRENCY_CODE) {
-                    when (journal.type) {
-                        "withdrawal", "withdrawals", "expense" -> {
-                            cashFlows[journal.currencyCode] = cashFlows.getOrZero(journal.currencyCode) - amount
-                        }
-                        "deposit", "deposits", "income" -> {
-                            cashFlows[journal.currencyCode] = cashFlows.getOrZero(journal.currencyCode) + amount
-                        }
-                    }
+                    cashFlows[journal.currencyCode] = cashFlows.getOrZero(journal.currencyCode) + amount
                 }
             }
         }
@@ -127,7 +120,8 @@ class SummaryRepository(
     suspend fun getAssetBalanceAtDate(date: LocalDate, groupBy: GroupBy, timeOfDay: TimeOfDayBoundary): HashMap<String, BigDecimal> {
         val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
         val accountsType = if (groupBy==GroupBy.ACCOUNT) "all" else "asset"
-        val fetchedAccounts = accountRepository.fetchAccounts(date, accountsType)
+        val fetchedAccounts = if (timeOfDay == TimeOfDayBoundary.START) accountRepository.fetchAccounts(date, accountsType)
+                            else accountRepository.fetchAccounts(date.plusDays(1), accountsType)
         val cashFlows = calculateCashFlow(DateRangeBoundaries(date, date), groupBy)
         val balances = hashMapOf<String, BigDecimal>()
 
@@ -138,7 +132,6 @@ class SummaryRepository(
             }
 
             balances[key] = balances.getOrZero(key) + account.attributes.currentBalance.toBigDecimal()
-            if (timeOfDay == TimeOfDayBoundary.START) balances[key] = balances.getOrZero(key) - cashFlows.getOrZero(key)
 
             if (account.attributes.openingBalanceDate!=null && account.attributes.openingBalance!=null && groupBy==GroupBy.CURRENCY_CODE) {
                 val openingBalanceDate = LocalDate.parse(account.attributes.openingBalanceDate,textDateFormat)
@@ -175,6 +168,7 @@ class SummaryRepository(
     suspend fun getFullOverview(dateRange: DateRangeBoundaries): HashMap<String, GeneralOverview> {
         val fetchedSummary = fetchSummaryBasic(dateRange)
         val initialAssets = getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
+        val endingAssets = getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.END)
         val cashFlows = calculateCashFlow(dateRange, GroupBy.CURRENCY_CODE)
         val openingBalances = getOpeningBalanceByCurrency(dateRange)
 
@@ -182,7 +176,7 @@ class SummaryRepository(
 
         for (currencyCode in cashFlows.keys) {
             val initialAsset = initialAssets.getOrZero(currencyCode)
-            val endingAsset = initialAsset + cashFlows.getOrZero(currencyCode) + openingBalances.getOrZero(currencyCode)
+            val endingAsset = endingAssets.getOrZero(currencyCode)
 
             val balanceDto = fetchedSummary["balance-in-$currencyCode"]
             val earned = fetchedSummary["earned-in-$currencyCode"]?.monetaryValue?.toBigDecimal() ?: BigDecimal(0)

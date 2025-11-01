@@ -57,10 +57,12 @@ class DataCollectorService(
         progressTracker.report("Collecting general overview data")
         generalOverview = summaryRepository.getFullOverview(dateRange)[mainCurrency.code]!!
         initialBalances = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.ACCOUNT, TimeOfDayBoundary.START)
+        endingBalances = summaryRepository.getAssetBalanceAtDate(dateRange.endDate, GroupBy.ACCOUNT, TimeOfDayBoundary.END)
 
         for (account in accounts) {
             account.initialBalance =  initialBalances.getOrZero(account.id)
             account.initialBalanceDate = dateRange.startDate
+            account.currentBalance = endingBalances.getOrZero(account.id)
         }
 
         logger.info("Collecting transactions data...")
