@@ -7,33 +7,32 @@ import org.jfree.chart.plot.XYPlot
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer
 import java.awt.BasicStroke
 import java.awt.Color
+import kotlin.random.Random
 
 
-class ThemeChartCustomizer: JRChartCustomizer {
+class ThemeChartCustomizer : JRChartCustomizer {
     override fun customize(chart: JFreeChart?, jasperChart: JRChart) {
-        val propertiesMap = jasperChart.propertiesMap
-        if (propertiesMap != null) {
-            val paramValue = propertiesMap.getProperty("property.theme_dark_color")
-            if (paramValue != null && paramValue != "") {
-                try {
-                    val dynamicColor = Color.decode(paramValue)
+        try {
+            val plot = chart?.plot as? XYPlot ?: return
+            val renderer = plot.renderer as? XYLineAndShapeRenderer ?: return
 
-                    val plot = chart?.plot as? XYPlot
-                    if (plot != null) {
-                        val renderer = plot.renderer as? XYLineAndShapeRenderer
-                        if (renderer != null) {
-                            renderer.setSeriesPaint(0, dynamicColor)
-
-                            renderer.setSeriesStroke(0, BasicStroke(1.5f))
-
-                            renderer.setSeriesShapesVisible(0, false)
-                            renderer.setSeriesShapesFilled(0, true)
-                        }
-                    }
-                } catch (e: Exception) {
-                    println("Error applying theme color: ${e.message}")
-                }
+            val seriesCount = plot.dataset.seriesCount
+            for (i in 0 until seriesCount) {
+                val randomDarkColor = generateRandomDarkColor()
+                renderer.setSeriesPaint(i, randomDarkColor)
+                renderer.setSeriesStroke(i, BasicStroke(1.5f))
+                renderer.setSeriesShapesVisible(i, false)
+                renderer.setSeriesShapesFilled(i, true)
             }
+        } catch (e: Exception) {
+            println("Error customizing chart: ${e.message}")
         }
+    }
+
+    private fun generateRandomDarkColor(): Color {
+        val hue = Random.nextFloat()
+        val saturation = 0.4f + Random.nextFloat() * 0.5f
+        val brightness = 0.2f + Random.nextFloat() * 0.5f
+        return Color.getHSBColor(hue, saturation, brightness)
     }
 }

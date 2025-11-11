@@ -51,7 +51,7 @@ class FireporterController(
         progressBar.progressProperty().bind(progressTracker.progressProperty)
         statusLabel.textProperty().bind(progressTracker.messageProperty)
 
-        hostTextField.text = "localhost:777"
+        hostTextField.text = "localhost"
         versionLabel.text = "v$version"
         logger.info("JavaFX controller initiated.")
     }
@@ -185,19 +185,20 @@ class FireporterController(
     private fun getFullYearPeriods(): List<String> {
         return buildList {
             addAll(monthNames)
-            addAll(listOf("Q1", "Q2", "Q3", "H1", "H2", "All Year"))
+            addAll(listOf("Q1", "Q2", "Q3", "Q4", "H1", "H2", "All Year"))
         }
     }
 
     private fun getCurrentYearPeriods(): List<String> {
         return buildList {
             addAll(monthNames.take(currentMonth))
+            add("Q1")  // Jan–Mar
+            if (currentMonth > 3) add("Q2")  // Apr–Jun
+            if (currentMonth > 6) add("Q3")  // Jul–Sep
+            if (currentMonth > 9) add("Q4")  // Oct-Dec
 
-            if (currentMonth > 4) add("Q1")  // Jan–Apr
-            if (currentMonth > 8) add("Q2")  // May–Aug
-            if (currentMonth > 9) add("Q3")  // Sep–Dec
-            if (currentMonth > 6) add("H1")  // Jan–Jun
-
+            add("H1")
+            if (currentMonth > 6) add("H2")
             add("All Year")
         }
     }
@@ -262,7 +263,9 @@ class FireporterController(
 
         progressTracker.reset()
         job = controllerScope.launch {
-            viewModel.generate(host, token, periodComboBox, yearComboBox, activeTheme, includeAttachmentsCheckBox)
+            if (viewModel.testConnection(host, token)) {
+                viewModel.generate(periodComboBox, yearComboBox, activeTheme, includeAttachmentsCheckBox)
+            }
 
             includeAttachmentsCheckBox.isDisable = false
             enableAllThemeButtons()

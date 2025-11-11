@@ -7,3 +7,9 @@ data class ChartEntry(
     val label: Date,
     val value: BigDecimal
 )
+
+data class ChartEntryWrapper(
+    val seriesName: String,
+    val label: Date,
+    val value: BigDecimal
+)

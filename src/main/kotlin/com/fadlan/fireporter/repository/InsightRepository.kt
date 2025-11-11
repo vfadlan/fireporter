@@ -6,6 +6,7 @@ import com.fadlan.fireporter.model.InsightGroup
 import com.fadlan.fireporter.model.InsightItem
 import com.fadlan.fireporter.model.InsightType
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import com.fadlan.fireporter.utils.titleCase
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -18,15 +19,17 @@ class InsightRepository(
     private val cred: CredentialProvider
 ) {
     private suspend fun fetchInsight(type: String, filter: String, dateRange: DateRangeBoundaries): MutableList<InsightItemDto> {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "insight", type, filter)
-                parameters.append("start", dateRange.startDate.toString())
-                parameters.append("end", dateRange.endDate.toString())
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "insight", type, filter)
+                    parameters.append("start", dateRange.startDate.toString())
+                    parameters.append("end", dateRange.endDate.toString())
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         val accountsResponse: MutableList<InsightItemDto> = response.body()
         accountsResponse.sortByDescending { it.differenceFloat }

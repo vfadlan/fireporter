@@ -1,16 +1,18 @@
 package com.fadlan.fireporter.viewmodel
 
+import com.fadlan.fireporter.dto.CurrencyAttributesDto
 import com.fadlan.fireporter.dto.SystemInfoResponse
-import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.model.Theme
+import com.fadlan.fireporter.network.ClientErrorException
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.ServerErrorException
+import com.fadlan.fireporter.repository.CurrencyRepository
 import com.fadlan.fireporter.service.DataCollectorService
 import com.fadlan.fireporter.service.JasperReportService
 import com.fadlan.fireporter.utils.DateRangeResolver
 import com.fadlan.fireporter.utils.FxProgressTracker
 import com.fadlan.fireporter.utils.IconizedAlert
-import com.fadlan.fireporter.utils.exceptions.IllegalDateRangeException
-import com.fadlan.fireporter.utils.exceptions.InactiveAccountException
+import com.fadlan.fireporter.utils.exceptions.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -36,17 +38,10 @@ class FireporterViewModel(
         progressTracker.totalSteps = 8
     }
 
-    suspend fun generate(host: String, token: String, periodComboBox: ComboBox<String>, yearComboBox: ComboBox<Int>, theme: Theme, includeAttachmentCheckBox: CheckBox) {
-        cred.host = host
-        cred.token = token
-        if (!testConnection(host, token)) {
-            logger.error("Connection test failed. Process cancelled.")
-            return
-        }
-
+    suspend fun generate(periodComboBox: ComboBox<String>, yearComboBox: ComboBox<Int>, theme: Theme, includeAttachmentCheckBox: CheckBox) {
         val period = periodComboBox.selectionModel.selectedItem
         val year = yearComboBox.selectionModel.selectedItem
-        val dateRange: DateRangeBoundaries = dateRangeResolver.resolve(period, year)
+        val dateRange = dateRangeResolver.resolve(period, year)
         val mainWindow = periodComboBox.scene.window
 
         try {
@@ -67,12 +62,12 @@ class FireporterViewModel(
             logger.info("PDF Generated successfully.")
         } catch (exception: InactiveAccountException) {
             logger.error("Account inactive at period $period $year.")
-            progressTracker.sendMessage(exception.message)
+            progressTracker.sendMessage("No active account found at period $period $year.")
             progressTracker.resetProgress()
 
             IconizedAlert(
                 Alert.AlertType.ERROR,
-                "No account Found",
+                "No active account found",
                 "${exception.message}",
                 "You were inactive at $period $year"
             ).showAndWait()
@@ -100,21 +95,63 @@ class FireporterViewModel(
                     "You can close this pop-up."
                 ).showAndWait()
             } else {
-                logger.error("Unknown exception: ${exception.message}")
+                logger.error("IllegalStateException: ${exception.message}")
                 progressTracker.sendMessage("An unknown error occur.")
                 progressTracker.resetProgress()
 
                 IconizedAlert(
                     Alert.AlertType.ERROR,
-                    "Unknown Error",
+                    "Illegal State Error",
                     "${exception.message}",
                     "Try again",
                 ).showAndWait()
             }
+        } catch (exception: MultipleCurrencyException) {
+            logger.error("Unsupported Action: Multi-currency transaction detected. ${exception.message}")
+            progressTracker.sendMessage("Multi-currency transaction found; this operation is not yet supported.")
+            progressTracker.resetProgress()
+            IconizedAlert(
+                Alert.AlertType.ERROR,
+                "Unsupported Action",
+                "Multiple-Currency Transaction Detected",
+                "Fireporter does not support transactions involving multiple currencies for this action."
+            ).showAndWait()
+        } catch (exception: ClientErrorException) {
+            logger.error("Client Error: ${exception.message}")
+            progressTracker.sendMessage("Client Error. Update to latest Fireporter and try again.")
+            progressTracker.resetProgress()
+            IconizedAlert(
+                Alert.AlertType.ERROR,
+                "Client Error",
+                "Client Error, update to latest version of Fireporter and try again.",
+                "If this error persist, please report to Issue on the Github Repository (vFadlan011/fireporter). Detailed error available on logs."
+            ).showAndWait()
+        } catch (exception: ServerErrorException) {
+            logger.error("Firefly III Internal Server Error: ${exception.message}")
+            progressTracker.sendMessage("Firefly III Internal Server Error.")
+            progressTracker.resetProgress()
+            IconizedAlert(
+                Alert.AlertType.ERROR,
+                "Firefly III Internal Server Error",
+                "Firefly III Internal Server Error. Update your Firefly III to latest 6.x version and try again.",
+                "If this error persist, please report to Issue on the Github Repository (vFadlan011/fireporter). Detailed error available on logs."
+            ).showAndWait()
+        } catch (exception: Exception) {
+            logger.error("Unknown exception: ${exception.message}")
+            progressTracker.sendMessage("An unknown error occur.")
+            progressTracker.resetProgress()
+            IconizedAlert(
+                Alert.AlertType.ERROR,
+                "Unknown Error",
+                "Unknown Error",
+                "An unknown error occurred: ${exception.message}"
+            ).showAndWait()
         }
     }
 
     suspend fun testConnection(host: String, token: String): Boolean {
+        cred.host = host
+        cred.token = token
         logger.info("Testing connection")
         if (host.isBlank() || token.isBlank()) {
             logger.warn("Incomplete field: host address and access token.")

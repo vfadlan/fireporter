@@ -24,17 +24,19 @@ Fireporter does not offer pre-built binaries for MacOS old architecture. You mus
 
 ## ✅ TODO
 
-- [ ] Budget
-- [ ] Multi-currency support (Major Update)
+- [ ] Add background color to table column header on transaction history
+- [x] <s>Any-currency support (Major Update)</s>
 - [x] <s>Toggle attachments</s>
 - [x] <s>Add Logging</s>
 - [x] <s>Build to executable for distribution</s>
 - [x] <s>Github Action for building distributions</s>
+- [x] New gradle task to rename installers and zipped images.
 
 ## ⚠️ Important Notes
-- Currently, supports only Indonesian Rupiah (IDR). Multi-currency support is planned.
-- Release only available for Windows 10, others will be added.
+- Currently, supports any currency but not multiple currencies. E.g. you can only have one currency in your Firefly III adminstration.
+- Release are available for `Windows x64`, `Linux x64`, and `MacOS (Apple Silicon)`. But only Windows version that has been tested.
 - Fireporter only reads data from Firefly III via API and formats it into a PDF.
+- Tips: Store attachments as image instead of pdf for faster process. Fireporter will have to convert entire pages of PDF file to multiple image files before attaching it to generated report.
 
 ## 📄 Disclaimer
 Fireporter is provided "as is", without warranty of any kind. The developer is not responsible for any loss, damage, or errors caused by use of this application. Use at your own risk.
@@ -43,8 +45,39 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.6 - 2025/11/11
+- (FIX) - Correct year to 4 quarter periods instead of 3
+
+### 2.0.5 - 2025/11/1
+- (FIX) - Faulty initial and ending balance approximation of asset accounts
+
+### 2.0.4 - 2025/09/03
+- (REFACTOR) Improve transaction report table layout
+- (REFACTOR) Improve column header choice of words
+- (FEATURE) Add bookmarks to headings
+
+### 2.0.3 - 2025/08/26
+- (FEATURE) Added theme-based background colors to column headers in Transaction History
+
+### 2.0.2 - 2025/08/24
+- (BUG FIX) Fixed missing application icon on Linux
+- (BUG FIX) Fixed incorrect application and installer name on Linux
+- (BUG FIX) Fixed truncation of application name and version in the UI
+- (BUG FIX) Fixed issue where inactive accounts were ignored instead of throwing `InactiveAccountException`
+- (BUG FIX) Fixed incorrect initial balance calculation
+- (BUG FIX) Fixed unresolved `decimalPlaces` when fetching currencies
+- (REFACTOR) Added and implement `safeRequest` utility for centralized HTTP error handling (throws `ClientErrorException` on 4xx errors and `ServerErrorException` on 5xx errors).
+
+### 2.0.1 - 2025/07/30
+- Supports for any currency. (But not multi-currency)
+- Change on transaction history table
+- Add unit tests
+- Bug fixes
+
 ### 1.0.3 - 2025/07/11
 - New: Added a GitHub Action for building and releasing distributions.
+- New: Implement up to service layers logging.
+- New: Cache attachments after download until app closed.
 - Changed: Switched the jdkDownload source to a custom JDK and JavaFX bundle.
 - Changed: Jumped the major version to 1 to ensure compatibility with macOS.
 

@@ -7,6 +7,9 @@ import com.fadlan.fireporter.model.DateRangeBoundaries
 import com.fadlan.fireporter.model.GeneralOverview
 import com.fadlan.fireporter.model.TransactionJournal
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
+import com.fadlan.fireporter.utils.exceptions.MultipleCurrencyException
+import com.fadlan.fireporter.utils.getOrZero
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -23,22 +26,24 @@ class TransactionRepository(
     private val attachmentRepository: AttachmentRepository
 ) {
     private suspend fun fetchSinglePageTransactions(page: Int, dateRange: DateRangeBoundaries): TransactionResponse {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "transactions")
-                parameters.append("start", dateRange.startDate.toString())
-                parameters.append("end", dateRange.endDate.toString())
-                parameters.append("page", page.toString())
-                parameters.append("type", "all")
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "transactions")
+                    parameters.append("start", dateRange.startDate.toString())
+                    parameters.append("end", dateRange.endDate.toString())
+                    parameters.append("page", page.toString())
+                    parameters.append("type", "all")
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         return response.body()
     }
 
-    private suspend fun fetchTransactions(dateRange: DateRangeBoundaries): MutableList<TransactionDto> {
+    suspend fun fetchTransactions(dateRange: DateRangeBoundaries): MutableList<TransactionDto> {
         var currentPage = 1
         val transactionResponse = fetchSinglePageTransactions(currentPage, dateRange)
         val totalPages = transactionResponse.meta.pagination.totalPages
@@ -122,6 +127,7 @@ class TransactionRepository(
                         journal.order,
                         journal.currencyCode,
                         journal.currencySymbol,
+                        journal.currencyDecimalPlaces,
                         amount,
                         journal.description,
                         journal.sourceId,
@@ -140,6 +146,86 @@ class TransactionRepository(
                         journal.hasAttachments,
                         journalAttachment,
                         currentBalance,
+                        currentBalance,
+                        currentBalance,
+                        journalElementId,
+                        firstAttachmentElementId
+                    )
+                )
+            }
+        }
+
+        return journals
+    }
+
+    suspend fun getTransactionJournals(dateRange: DateRangeBoundaries, initialBalances: HashMap<String, BigDecimal>): MutableList<TransactionJournal> {
+        val fetchedTransactions = fetchTransactions(dateRange)
+        val journals: MutableList<TransactionJournal> = mutableListOf()
+        val currentBalances = HashMap(initialBalances)
+        val journalIds = mutableListOf<Int>()
+
+        for (transaction in fetchedTransactions) {
+            val transactionJournals = transaction.attributes.transactions
+            val attachments = attachmentRepository.getAttachmentsByTransactionId(transaction.id)
+
+            for (journal in transactionJournals) {
+                if (!journalIds.add(journal.transactionJournalId.toInt())) continue
+                if (journal.foreignCurrencyCode!=null) {
+                    if (journal.currencyCode!=journal.foreignCurrencyCode) throw MultipleCurrencyException()
+                }
+
+                currentBalances[journal.sourceId] = currentBalances.getOrZero(journal.sourceId) - journal.amount.toBigDecimal()
+                currentBalances[journal.destinationId] = currentBalances.getOrZero(journal.destinationId) + journal.amount.toBigDecimal()
+
+                val datetime = ZonedDateTime.parse(journal.date)
+                val epochTime = datetime.toEpochSecond()
+                val journalElementId = "$epochTime-${journal.transactionJournalId}"
+                var firstAttachmentElementId: String? = null
+
+                val journalAttachment = mutableListOf<Attachment>()
+                val iterator = attachments.iterator()
+                while (iterator.hasNext()) {
+                    val attachment = iterator.next()
+                    if (attachment.attachableId == journal.transactionJournalId) {
+                        attachment.elementId = "$journalElementId-${attachment.id}"
+                        attachment.parentId = journalElementId
+                        attachment.parentDescription = journal.description
+
+                        journalAttachment += attachment
+                        if (firstAttachmentElementId.isNullOrBlank()) firstAttachmentElementId = attachment.elementId
+                        iterator.remove()
+                    }
+                }
+                
+                journals.add(
+                    TransactionJournal(
+                        journal.transactionJournalId,
+                        journal.type,
+                        datetime,
+                        journal.order,
+                        journal.currencyCode,
+                        journal.currencySymbol,
+                        journal.currencyDecimalPlaces,
+                        journal.amount.toBigDecimal(),
+                        journal.description,
+                        journal.sourceId,
+                        journal.sourceName,
+                        journal.sourceType,
+                        journal.destinationId,
+                        journal.destinationName,
+                        journal.destinationType,
+                        journal.budgetId,
+                        journal.budgetName,
+                        journal.categoryId,
+                        journal.categoryName,
+                        journal.billId,
+                        journal.billName,
+                        journal.tags,
+                        journal.hasAttachments,
+                        journalAttachment,
+                        balanceLeft=null,
+                        currentBalances[journal.sourceId],
+                        currentBalances[journal.destinationId],
                         journalElementId,
                         firstAttachmentElementId
                     )

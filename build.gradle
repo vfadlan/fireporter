@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '1.0.3'
+version = '2.0.6'
 
 repositories {
     mavenCentral()
@@ -50,6 +50,8 @@ javafx {
 }
 
 dependencies {
+    implementation 'io.ktor:ktor-client-core-jvm:3.1.3'
+    implementation 'io.ktor:ktor-client-apache:3.1.3'
     runtimeOnly files('lib/jetbrains-mono-font-ext.jar')
     runtimeOnly files('lib/montserrat-font-ext.jar')
     runtimeOnly files('lib/roboto-font-ext.jar')
@@ -129,10 +131,18 @@ sourceSets {
 
 test {
     useJUnitPlatform()
+
+    filter {
+        excludeTestsMatching("com.fadlan.fireporter.repository.**")
+    }
 }
 
 tasks.test {
     useJUnitPlatform()
+
+    filter {
+        excludeTestsMatching("com.fadlan.fireporter.repository.**")
+    }
 }
 
 tasks.processResources {
@@ -198,29 +208,34 @@ runtime {
         imageName = "Fireporter"
         installerOptions = [
                 '--vendor', 'Fadlan Abduh',
+                "--name", "Fireporter"
         ]
         appVersion = project.version
         resourceDir = file("src/main/resources") as File
 
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
 
-        def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
-        imageOptions += ['--icon', "src/main/resources/icons/fireporter.$imgType"]
+        def imgType = ""
 
         if(currentOs.windows) {
             targetPlatformName = "win"
             installerType = "msi"
+            imgType = "ico"
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
         } else if (currentOs.linux) {
             targetPlatformName = "linux"
             installerType = "deb"
-            imageName = "fireporter"
+            imgType = "png"
             installerOptions += ['--linux-package-name', 'fireporter', '--linux-shortcut']
         } else if (currentOs.macOsX) {
             targetPlatformName = "mac"
             installerType = "dmg"
+            imgType = "icns"
             installerOptions += ['--mac-package-name', 'fireporter']
         }
+
+        def iconPath = file("src/main/resources/icons/fireporter.$imgType") as File
+        imageOptions += ['--icon', iconPath.absolutePath]
 
         def arch = System.getProperty("os.arch")
         installerName = "fireporter_$targetPlatformName-${arch}_v"
@@ -243,7 +258,7 @@ tasks.register('packImage') {
             def imageDir = file("$buildDir/distributions/image/Fireporter")
             ant.zip(destfile: "${outputDir}/${archiveFileName}", basedir: imageDir)
         } else if (currentOs.linux) {
-            def imageDir = file("$buildDir/distributions/image/fireporter")
+            def imageDir = file("$buildDir/distributions/image/Fireporter")
             ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
                 tarfileset(dir: imageDir)
             }
@@ -252,6 +267,97 @@ tasks.register('packImage') {
             ant.tar(destfile: "${outputDir}/${archiveFileName}", compression: "gzip") {
                 tarfileset(dir: imageDir)
             }
+        }
+    }
+}
+
+def currentOs = org.gradle.internal.os.OperatingSystem.current()
+
+// task to patch the .deb after jpackage
+if (currentOs.linux) {
+    tasks.register("patchDebIcon") {
+        dependsOn tasks.named("jpackage") // or whatever task builds your .deb
+        doLast {
+            def distDir = file("${buildDir}/distributions/installer")
+            def debFile = distDir.listFiles().find { it.name.endsWith(".deb") }
+
+            if (debFile == null) {
+                throw new GradleException("No .deb file found in $distDir")
+            }
+
+            println "Patching icon in ${debFile.name}"
+
+            def tmpDir = file("$buildDir/debtmp")
+            tmpDir.deleteDir()
+            tmpDir.mkdirs()
+
+            // Extract .deb
+            exec {
+                commandLine "dpkg-deb", "-R", debFile.absolutePath, tmpDir.absolutePath
+            }
+
+            // Fix .desktop file
+            def desktopFile = file("$tmpDir/opt/fireporter/lib/fireporter-Fireporter.desktop")
+            ant.replace(file: desktopFile, token: ~/Icon=.*/, value: "Icon=Fireporter")
+
+            // Copy your app icon into standard icon dir
+            def iconsDir = file("$tmpDir/opt/fireporter/lib")
+            iconsDir.mkdirs()
+            copy {
+                from "src/main/resources/icons/fireporter.png"
+                into iconsDir
+                rename { "Fireporter.png" }
+            }
+
+            def installerName = "Fireporter_linux-${System.getProperty("os.arch")}_v${project.version}.deb"
+
+            // Rebuild package
+            def fixedDeb = new File(debFile.parent, installerName)
+            exec {
+                commandLine "dpkg-deb", "-b", tmpDir.absolutePath, fixedDeb.absolutePath
+            }
+            if (debFile.exists()) {
+                debFile.delete()
+            }
+
+            println "Fixed package created at: $fixedDeb"
+        }
+    }
+}
+
+
+tasks.register("renameInstaller") {
+    dependsOn("jpackage")
+    doLast {
+        def distDir = file("$buildDir/distributions/installer")
+        if (!distDir.exists()) {
+            throw new GradleException("Installer directory not found: $distDir")
+        }
+
+        def installerFile = distDir.listFiles()?.find { it.isFile() }
+        if (installerFile == null) {
+            throw new GradleException("No installer file found in $distDir")
+        }
+
+        def arch = System.getProperty("os.arch")
+        def ext  = installerFile.name.tokenize('.').last()
+        def os   = org.gradle.internal.os.OperatingSystem.current()
+        def newFileName
+
+        if (os.isWindows()) {
+            newFileName = "Fireporter_Win-${arch}_v${project.version}.${ext}"
+        } else if (os.isLinux()) {
+            newFileName = "Fireporter_Linux-${arch}_v${project.version}.${ext}"
+        } else if (os.isMacOsX()) {
+            newFileName = "Fireporter_MacOS-${arch}_v${project.version}.${ext}"
+        } else {
+            newFileName = installerFile.name
+        }
+
+        def newFile = new File(installerFile.parentFile, newFileName)
+        println "Renaming ${installerFile.name} -> ${newFile.name}"
+        if (!installerFile.renameTo(newFile)) {
+            throw new GradleException("Failed to rename ${installerFile} to ${newFile}")
         }
     }
 }

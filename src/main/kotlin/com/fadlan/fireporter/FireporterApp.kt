@@ -9,6 +9,7 @@ import com.fadlan.fireporter.service.AttachmentService
 import com.fadlan.fireporter.service.DataCollectorService
 import com.fadlan.fireporter.service.JasperReportService
 import com.fadlan.fireporter.utils.DateRangeResolver
+import com.fadlan.fireporter.utils.DynamicTableStyler
 import com.fadlan.fireporter.utils.FxProgressTracker
 import com.fadlan.fireporter.viewmodel.FireporterViewModel
 import io.ktor.client.*
@@ -104,13 +105,24 @@ class FireporterApp : Application() {
                     get<HttpClient>(),
                     get<CredentialProvider>(),
                     get<AccountRepository>(),
+                    get<TransactionRepository>()
                 )
             }
+
+            single {
+                CurrencyRepository(
+                    get<HttpClient>(),
+                    get<CredentialProvider>(),
+                )
+            }
+
+            single { DynamicTableStyler() }
 
             includes(classLoggerModule<JasperReportService>())
             single {
                 JasperReportService(
-                    get(named(JasperReportService::class.qualifiedName!!))
+                    get(named(JasperReportService::class.qualifiedName!!)),
+                    get<DynamicTableStyler>()
                 )
             }
 
@@ -134,6 +146,7 @@ class FireporterApp : Application() {
                     get<InsightRepository>(),
                     get<TransactionRepository>(),
                     get<AttachmentService>(),
+                    get<CurrencyRepository>(),
                     get<HttpClient>(),
                     get<CredentialProvider>(),
                     get(named(DataCollectorService::class.qualifiedName!!))

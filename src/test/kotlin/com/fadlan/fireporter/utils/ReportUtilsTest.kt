@@ -43,7 +43,7 @@ class ReportUtilsTest : StringSpec({
     }
 
     // formatTime
-    "should format LocalDateTime to full English date" {
+    "should format LocalTime to 24h format time" {
         val dateTime = LocalDateTime.of(LocalDate.of(2022, 5, 1), LocalTime.of(20, 15, 0))
         ReportUtils.formatTime(dateTime.toLocalTime()) shouldBe "20:15"
     }

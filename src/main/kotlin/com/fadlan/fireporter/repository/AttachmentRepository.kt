@@ -4,6 +4,7 @@ import com.fadlan.fireporter.dto.AttachmentDto
 import com.fadlan.fireporter.dto.AttachmentResponse
 import com.fadlan.fireporter.model.Attachment
 import com.fadlan.fireporter.network.CredentialProvider
+import com.fadlan.fireporter.network.safeRequest
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -17,14 +18,16 @@ class AttachmentRepository(
     private val cred: CredentialProvider
 ) {
     private suspend fun fetchSinglePageAttachmentsByTransactionId(page: Int, transactionId: String): AttachmentResponse {
-        val response: HttpResponse = ktor.request(cred.host) {
-            url {
-                appendPathSegments("api", "v1", "transactions", transactionId, "attachments")
-                parameters.append("page", page.toString())
-            }
+        val response: HttpResponse = safeRequest {
+            ktor.request(cred.host) {
+                url {
+                    appendPathSegments("api", "v1", "transactions", transactionId, "attachments")
+                    parameters.append("page", page.toString())
+                }
 
-            headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
-            method = HttpMethod.Get
+                headers.append(HttpHeaders.Authorization, "Bearer ${cred.token}")
+                method = HttpMethod.Get
+            }
         }
         return response.body()
     }

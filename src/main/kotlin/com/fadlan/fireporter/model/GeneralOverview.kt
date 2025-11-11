@@ -8,7 +8,9 @@ data class GeneralOverview(
     val income: BigDecimal,
     val expense: BigDecimal,
     val netFlow: BigDecimal,
+    val openingBalance: BigDecimal?=0.toBigDecimal(),
     val currencyId: String,
     val currencyCode: String,
-    val currencySymbol: String
+    val currencySymbol: String,
+    val currencyDecimalPlaces: Int?=2
 )

@@ -15,11 +15,8 @@
 	</dataset>
 	<parameter name="THEME_DARK_COLOR" class="java.lang.String"/>
 	<parameter name="THEME_COLOR" class="java.lang.String"/>
-	<parameter name="CURRENCY_SYMBOL" class="java.lang.String"/>
-	<parameter name="CURRENCY_DECIMAL_PLACES" class="java.lang.Integer"/>
 	<parameter name="GENERAL_OVERVIEW" class="com.fadlan.fireporter.model.GeneralOverview"/>
 	<parameter name="DATE_RANGE" class="com.fadlan.fireporter.model.DateRangeBoundaries"/>
-	<parameter name="CURRENCY_CODE" class="java.lang.String"/>
 	<parameter name="ATTACHMENT_DATASET" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<group name="Attachment">
 		<groupHeader>
@@ -70,9 +67,9 @@
 		</groupHeader>
 	</group>
 	<title height="40" splitType="Stretch">
-		<element kind="staticText" uuid="ad00681d-cda2-416d-84e2-1f354ad00e81" x="50" y="0" width="470" height="40" fontName="Montserrat" fontSize="22.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Middle">
+		<element kind="textField" uuid="ad00681d-cda2-416d-84e2-1f354ad00e81" x="50" y="0" width="470" height="40" fontName="Montserrat" fontSize="22.0" bold="false" italic="false" hTextAlign="Left" vTextAlign="Middle" hyperlinkType="LocalAnchor" bookmarkLevel="1" anchorNameExpression="'3. Attachments'">
 			<paragraph leftIndent="8"/>
-			<text><![CDATA[Attachment]]></text>
+			<expression><![CDATA["Attachments"]]></expression>
 			<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
 			<propertyExpression name="net.sf.jasperreports.style.forecolor"><![CDATA[$P{THEME_DARK_COLOR}]]></propertyExpression>
 		</element>

@@ -1,9 +1,10 @@
 package com.fadlan.fireporter.service
 
 import com.fadlan.fireporter.FireporterApp
-import com.fadlan.fireporter.model.ChartEntry
+import com.fadlan.fireporter.model.ChartEntryWrapper
 import com.fadlan.fireporter.model.ReportData
 import com.fadlan.fireporter.model.Theme
+import com.fadlan.fireporter.utils.DynamicTableStyler
 import com.fadlan.fireporter.utils.getProperty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,22 +16,19 @@ import org.slf4j.Logger
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.InputStream
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Date
 import javax.imageio.ImageIO
 import kotlin.collections.HashMap
 
 class JasperReportService(
-    private val logger: Logger
+    private val logger: Logger,
+    private val tableStyler: DynamicTableStyler
 ) {
     private val compiledReports = mutableMapOf<String, JasperReport>()
+    private val compiledTransactionReports = mutableMapOf<String, JasperReport>()
 
     private val jrxmlFiles = listOf(
         "report-book-cover.jrxml",
         "report-summary.jrxml",
-        "report-transaction.jrxml",
         "report-attachment.jrxml",
         "report-disclaimer.jrxml",
         "book.jrxml",
@@ -41,32 +39,56 @@ class JasperReportService(
 
         logger.info("Compiling jasper .jrxml files...")
         for (jrxmlName in jrxmlFiles) {
-            val resourcePath = "/com/fadlan/fireporter/jasper/$jrxmlName"
-            val stream = FireporterApp::class.java.getResourceAsStream(resourcePath)
-                ?: throw IllegalArgumentException("Missing jrxml resource: $resourcePath")
-            val design = JRXmlLoader.load(stream)
-
-            try {
-                design.language = "groovy"
-                val report = JasperCompileManager.compileReport(design)
-                val reportKey = jrxmlName.removeSuffix(".jrxml")
-                compiledReports[reportKey] = report
-            } catch (e: JRException) {
-                logger.error("Failed to compile $jrxmlName: ${e.message}")
-                throw IllegalStateException("Failed to compile: $jrxmlName: ${e.message}", e)
-            }
+            val reportKey = jrxmlName.removeSuffix(".jrxml")
+            compiledReports[reportKey] = compileReport(jrxmlName, "#000000")
         }
         logger.info("${compiledReports.size} of ${jrxmlFiles.size} .jrxml files compiled successfully.")
+    }
+
+    private fun compileReport(jrxmlName: String, themeColorHex: String): JasperReport {
+        val resourcePath = "/com/fadlan/fireporter/jasper/$jrxmlName"
+        val stream = FireporterApp::class.java.getResourceAsStream(resourcePath)
+            ?: throw IllegalArgumentException("Missing jrxml resource: $resourcePath")
+        val design = JRXmlLoader.load(stream)
+
+        try {
+            design.language = "groovy"
+
+            if (jrxmlName == "report-transaction.jrxml") {
+                tableStyler.applyDynamicHeaderStyling(design, themeColorHex)
+            }
+
+            val report = JasperCompileManager.compileReport(design)
+            return report
+        } catch (e: JRException) {
+            logger.error("Failed to compile $jrxmlName: ${e.message}")
+            throw IllegalStateException("Failed to compile: $jrxmlName: ${e.message}", e)
+        }
     }
 
     private fun loadCompiledReport(name: String): JasperReport {
         return compiledReports[name]
             ?.apply { whenNoDataType = WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL }
             ?: throw IllegalArgumentException("Compiled report not found: $name")
+   }
+
+    private fun loadCompiledTransactionReport(theme: Theme): JasperReport {
+        val themeKey = "trans-report-${theme.name}"
+
+        if (compiledTransactionReports.containsKey(themeKey)) {
+            return compiledTransactionReports[themeKey]
+                ?.apply { whenNoDataType = WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL }
+                ?: throw IllegalArgumentException("Compiled report not found: $themeKey")
+        }
+
+        compiledTransactionReports[themeKey] = compileReport("report-transaction.jrxml", theme.darkColorHex)
+
+        return compiledTransactionReports[themeKey]
+            ?.apply { whenNoDataType = WhenNoDataTypeEnum.ALL_SECTIONS_NO_DETAIL }
+            ?: throw IllegalArgumentException("Compiled report not found: $themeKey")
     }
 
-    private fun loadCoverImage(theme: Theme): BufferedImage {
-        val resourcePath = "/com/fadlan/fireporter/cover-images/report-cover_${theme.name}.png"
+    private fun loadCoverImage(theme: Theme): BufferedImage {        val resourcePath = "/com/fadlan/fireporter/cover-images/report-cover_${theme.name}.png"
         val coverStream: InputStream = FireporterApp::class.java.getResourceAsStream(resourcePath)
             ?: throw IllegalArgumentException("Error: Report cover image not found for theme ${theme.name} at path: $resourcePath")
 
@@ -85,7 +107,7 @@ class JasperReportService(
             params.loadCommonParameters(data, theme)
             params.loadCover(loadCoverImage(theme), loadCompiledReport("report-book-cover"))
             params.loadSummary(data, loadCompiledReport("report-summary"))
-            params.loadTransactionHistory(data, loadCompiledReport("report-transaction"))
+            params.loadTransactionHistory(data, loadCompiledTransactionReport(theme))
             params.loadAttachments(data, loadCompiledReport("report-attachment"))
             params.loadSysInfo(data)
 
@@ -107,11 +129,7 @@ fun HashMap<String, Any>.loadCommonParameters(data: ReportData, theme: Theme) {
 
     this["THEME_COLOR"] = theme.colorHex
     this["THEME_DARK_COLOR"] = theme.darkColorHex
-
-    this["CURRENCY_CODE"] = data.currencyCode
-    this["CURRENCY_SYMBOL"] = data.currencySymbol
-    this["CURRENCY_DECIMAL_PLACES"] = data.currencyDecimalPlaces
-
+    this["CURRENCY"] = data.currency
     this["DATE_RANGE"] = data.dateRange
 }
 
@@ -121,8 +139,6 @@ fun HashMap<String, Any>.loadCover(coverImage: BufferedImage, coverReport: Jaspe
 }
 
 fun HashMap<String, Any>.loadSummary(data: ReportData, summaryReport: JasperReport) {
-    val textDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
-
     this["SUMMARY_REPORT"] = summaryReport
 
     this["GENERAL_OVERVIEW"] = data.generalOverview
@@ -130,21 +146,11 @@ fun HashMap<String, Any>.loadSummary(data: ReportData, summaryReport: JasperRepo
     this["INCOME_INSIGHT"] = JRBeanCollectionDataSource(data.incomeInsight)
     this["EXPENSE_INSIGHT"] = JRBeanCollectionDataSource(data.expenseInsight)
 
-    val dataSource = JRBeanCollectionDataSource(
-        data.chart.mapNotNull { (key, value) ->
-            try {
-                if (key.isBlank()) return@mapNotNull null
-                val localDate = LocalDate.parse(key, textDateFormat)
-                val date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+    val chartDataSource = data.chart.flatMap { (seriesName, entries) ->
+        entries.map { ChartEntryWrapper(seriesName, it.label, it.value) }
+    }
 
-                ChartEntry(date, value)
-            } catch (e: Exception) {
-                null
-            }
-        }
-    )
-
-    this["SUMMARY_CHART_DATASET"] = dataSource
+    this["SUMMARY_CHART_DATASOURCE"] = JRBeanCollectionDataSource(chartDataSource)
 }
 
 fun HashMap<String, Any>.loadTransactionHistory(data: ReportData, transactionReport: JasperReport) {
