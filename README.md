@@ -45,6 +45,12 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.6 - 2025/11/11
+- (FIX) - Correct year to 4 quarter periods instead of 3
+
+### 2.0.5 - 2025/11/1
+- (FIX) - Faulty initial and ending balance approximation of asset accounts
+
 ### 2.0.4 - 2025/09/03
 - (REFACTOR) Improve transaction report table layout
 - (REFACTOR) Improve column header choice of words

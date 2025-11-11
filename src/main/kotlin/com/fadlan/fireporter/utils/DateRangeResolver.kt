@@ -9,9 +9,10 @@ object DateRangeResolver {
         val textDateFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
         val (startMonth, endMonth) = when (period) {
-            "Q1" -> "January" to "April"
-            "Q2" -> "May" to "August"
-            "Q3" -> "September" to "December"
+            "Q1" -> "January" to "March"
+            "Q2" -> "April" to "June"
+            "Q3" -> "July" to "September"
+            "Q4" -> "October" to "November"
             "H1" -> "January" to "June"
             "H2" -> "July" to "December"
             "All Year" -> "January" to "December"
