@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-latest, windows-latest, rocky-8]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
 
     steps:
       - name: Checkout source
@@ -65,9 +65,60 @@ jobs:
         with:
           name: ${{ matrix.os }}-artifacts
           path: upload/
+  build_rhel:
+    name: Build RPM Distribution with Rocky Linux
+    runs-on: ubuntu-22.04
+
+    container: rockylinux:8
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Build Dependencies (Rocky/RHEL)
+        run: |
+          dnf update -y
+          dnf install -y java-21-openjdk-devel rpm-build
+          dnf clean all
+        shell: bash
+
+      - name: Grant execute permissions
+        run: chmod +x gradlew
+        shell: bash
+
+      - name: Build project
+        run: ./gradlew build runtime --no-daemon -x test
+        shell: bash
+
+      - name: Package project (Creates .rpm)
+        run: ./gradlew jpackage --no-daemon
+        shell: bash
+
+      - name: Rename installer file
+        run: ./gradlew renameInstaller
+        shell: bash
+
+      - name: Compress app image
+        run: ./gradlew packImage --no-daemon
+        shell: bash
+
+      - name: Archive outputs (Export the results)
+        run: |
+          mkdir -p upload
+          # Copy the RPM installer, zip, and tar.gz files
+          cp -r build/distributions/image/*.zip upload/ 2>/dev/null || true
+          cp -r build/distributions/image/*.tar.gz upload/ 2>/dev/null || true
+          cp -r build/distributions/installer/* upload/ 2>/dev/null || true
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocky-8-artifacts
+          path: upload/
 
   release:
-    needs: build
+    needs: [build, build_rhel]
     runs-on: ubuntu-22.04
     if: startsWith(github.ref, 'refs/tags/v')
 
