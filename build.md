@@ -39,7 +39,7 @@ Before building, ensure you have the following installed:
 
 3.  **Build the Runtime:** Open a terminal in the project directory and execute the following commands:
     ```bash
-    gradle build runtime
+    gradle build runtime -x test
     ```
 4.  **Create the Installer:**
     ```bash

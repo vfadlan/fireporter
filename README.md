@@ -22,15 +22,6 @@ Fireporter does not offer pre-built binaries for MacOS old architecture. You mus
 3. Choose the period you want to report.
 4. Click `Generate` to create the PDF.
 
-## ✅ TODO
-
-- [ ] Add background color to table column header on transaction history
-- [x] <s>Any-currency support (Major Update)</s>
-- [x] <s>Toggle attachments</s>
-- [x] <s>Add Logging</s>
-- [x] <s>Build to executable for distribution</s>
-- [x] <s>Github Action for building distributions</s>
-- [x] New gradle task to rename installers and zipped images.
 
 ## ⚠️ Important Notes
 - Currently, supports any currency but not multiple currencies. E.g. you can only have one currency in your Firefly III adminstration.
@@ -45,10 +36,12 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.7 - 2025/12/08
+
 ### 2.0.6 - 2025/11/11
 - (FIX) - Correct year to 4 quarter periods instead of 3
 
-### 2.0.5 - 2025/11/1
+### 2.0.5 - 2025/11/01
 - (FIX) - Faulty initial and ending balance approximation of asset accounts
 
 ### 2.0.4 - 2025/09/03

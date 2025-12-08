@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '2.0.6'
+version = '2.0.7'
 
 repositories {
     mavenCentral()
@@ -155,6 +155,24 @@ processResources {
     }
 }
 
+def getLinuxDistro() {
+    def currentOs = org.gradle.internal.os.OperatingSystem.current()
+
+    if (!currentOs.isLinux()) {
+        return "false"
+    }
+
+    if (new File("/etc/debian_version").exists() || new File("/etc/lsb-release").text.contains('ID=debian')) {
+        return "debian"
+    }
+
+    if (new File("/etc/redhat-release").exists() || new File("/etc/fedora-release").exists()) {
+        return "rhel"
+    }
+
+    return "other"
+}
+
 runtime {
     launcher {
         noConsole = true
@@ -214,6 +232,7 @@ runtime {
         resourceDir = file("src/main/resources") as File
 
         def currentOs = org.gradle.internal.os.OperatingSystem.current()
+        def linuxDistro = getLinuxDistro()
 
         def imgType = ""
 
@@ -224,9 +243,16 @@ runtime {
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
         } else if (currentOs.linux) {
             targetPlatformName = "linux"
-            installerType = "deb"
             imgType = "png"
             installerOptions += ['--linux-package-name', 'fireporter', '--linux-shortcut']
+
+            if (linuxDistro == "debian") {
+                installerType = "deb"
+            } else if (linuxDistro == "rhel") {
+                installerType = "rpm"
+            } else {
+                installerType = "rpm"
+            }
         } else if (currentOs.macOsX) {
             targetPlatformName = "mac"
             installerType = "dmg"
@@ -272,11 +298,12 @@ tasks.register('packImage') {
 }
 
 def currentOs = org.gradle.internal.os.OperatingSystem.current()
+def linuxDistro = getLinuxDistro()
 
 // task to patch the .deb after jpackage
-if (currentOs.linux) {
+if (currentOs.linux && linuxDistro == "debian") {
     tasks.register("patchDebIcon") {
-        dependsOn tasks.named("jpackage") // or whatever task builds your .deb
+        dependsOn tasks.named("jpackage")
         doLast {
             def distDir = file("${buildDir}/distributions/installer")
             def debFile = distDir.listFiles().find { it.name.endsWith(".deb") }
@@ -347,7 +374,8 @@ tasks.register("renameInstaller") {
         if (os.isWindows()) {
             newFileName = "Fireporter_Win-${arch}_v${project.version}.${ext}"
         } else if (os.isLinux()) {
-            newFileName = "Fireporter_Linux-${arch}_v${project.version}.${ext}"
+            def linuxType = linuxDistro == "debian" ? "Debian" : (linuxDistro == "rhel" ? "RPM" : "Linux")
+            newFileName = "Fireporter_${linuxType}-${arch}_v${project.version}.${ext}"
         } else if (os.isMacOsX()) {
             newFileName = "Fireporter_MacOS-${arch}_v${project.version}.${ext}"
         } else {
