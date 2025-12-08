@@ -162,12 +162,17 @@ def getLinuxDistro() {
         return "false"
     }
 
-    if (new File("/etc/debian_version").exists() || new File("/etc/lsb-release").text.contains('ID=debian')) {
-        return "debian"
-    }
+    def osReleaseFile = new File("/etc/os-release")
+    if (osReleaseFile.exists()) {
+        def osContent = osReleaseFile.text
 
-    if (new File("/etc/redhat-release").exists() || new File("/etc/fedora-release").exists()) {
-        return "rhel"
+        if (osContent.contains('ID=debian') || osContent.contains('ID=ubuntu')) {
+            return "debian" // Treating Ubuntu as Debian-like for packaging purposes
+        } else if (osContent.contains('ID=rocky') || osContent.contains('ID="rhel"')) {
+            return "rhel"
+        } else if (osContent.contains('ID=fedora')) {
+            return "fedora"
+        }
     }
 
     return "other"
