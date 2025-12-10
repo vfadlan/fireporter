@@ -55,7 +55,11 @@ class DataCollectorService(
 
         logger.info("Collecting general overview data...")
         progressTracker.report("Collecting general overview data")
-        generalOverview = summaryRepository.getFullOverview(dateRange)[mainCurrency.code]!!
+        val fullOverview = summaryRepository.getFullOverview(dateRange)
+        if (fullOverview.isEmpty()) {
+            throw InactiveAccountException()
+        }
+        generalOverview = fullOverview[mainCurrency.code]!!
         initialBalances = summaryRepository.getAssetBalanceAtDate(dateRange.startDate, GroupBy.ACCOUNT, TimeOfDayBoundary.START)
         endingBalances = summaryRepository.getAssetBalanceAtDate(dateRange.endDate, GroupBy.ACCOUNT, TimeOfDayBoundary.END)
 

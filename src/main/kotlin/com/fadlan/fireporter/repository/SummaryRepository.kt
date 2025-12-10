@@ -166,6 +166,7 @@ class SummaryRepository(
     }
 
     suspend fun getFullOverview(dateRange: DateRangeBoundaries): HashMap<String, GeneralOverview> {
+        //TODO: Handle zero transaction period.
         val fetchedSummary = fetchSummaryBasic(dateRange)
         val initialAssets = getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.START)
         val endingAssets = getAssetBalanceAtDate(dateRange.startDate, GroupBy.CURRENCY_CODE, TimeOfDayBoundary.END)

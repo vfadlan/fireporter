@@ -11,7 +11,7 @@ class DateRangeResolverTest : StringSpec({
         val result = DateRangeResolver.resolve("Q1", 2023)
         result shouldBe DateRangeBoundaries(
             startDate = LocalDate.of(2023, 1, 1),
-            endDate = LocalDate.of(2023, 4, 30),
+            endDate = LocalDate.of(2023, 3, 31),
             period = "Q1",
             year = 2023
         )

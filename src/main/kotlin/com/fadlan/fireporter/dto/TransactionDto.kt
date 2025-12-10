@@ -71,7 +71,7 @@ data class TransactionJournalDto(
     @SerialName("foreign_currency_id")val foreignCurrencyId: String?,
     @SerialName("foreign_currency_code")val foreignCurrencyCode: String?,
     @SerialName("foreign_currency_symbol")val foreignCurrencySymbol: String?,
-    @SerialName("foreign_currency_decimal_places")val foreignCurrencyDecimalPlaces: Int,
+    @SerialName("foreign_currency_decimal_places")val foreignCurrencyDecimalPlaces: Int?,
     val amount: String,
     @SerialName("foreign_amount")val foreignAmount: String?,
     val description: String,

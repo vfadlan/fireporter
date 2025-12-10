@@ -39,10 +39,11 @@ Before building, ensure you have the following installed:
 
 3.  **Build the Runtime:** Open a terminal in the project directory and execute the following commands:
     ```bash
-    gradle build runtime -x test
+    chmod u+x gradlew
+    ./gradlew build runtime -x test
     ```
 4.  **Create the Installer:**
     ```bash
-    gradle jpackage
+    ./gradlew jpackage
     ```
 5.  **Access the Installer:** If the build is successful, the application installer will be located in the `build/distributions/installer` directory.
