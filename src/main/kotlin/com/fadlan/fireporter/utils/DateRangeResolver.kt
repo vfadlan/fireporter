@@ -12,7 +12,7 @@ object DateRangeResolver {
             "Q1" -> "January" to "March"
             "Q2" -> "April" to "June"
             "Q3" -> "July" to "September"
-            "Q4" -> "October" to "November"
+            "Q4" -> "October" to "December"
             "H1" -> "January" to "June"
             "H2" -> "July" to "December"
             "All Year" -> "January" to "December"

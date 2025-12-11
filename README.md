@@ -36,6 +36,9 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.9 - 2025/12/11
+- (FIX) - Correct year to 4 quarter periods instead of 3 on Q4
+
 ### 2.0.8 - 2025/12/10
 - (FIX) Corrected quarter date range test case from 4 months to 3 months
 - (FIX) Made foreignCurrencyDecimalPlaces nullable
