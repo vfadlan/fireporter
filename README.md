@@ -36,6 +36,9 @@ Fireporter is provided "as is", without warranty of any kind. The developer is n
 This project is licensed under the [GNU AGPL v3.0](LICENSE).
 
 ## 📌 Changelog
+### 2.0.10 - 2025/12/13
+- (FIX) - Fix icon on linux installers (.deb and .rpm)
+
 ### 2.0.9 - 2025/12/11
 - (FIX) - Correct year to 4 quarter periods instead of 3 on Q4
 

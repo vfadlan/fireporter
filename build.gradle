@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.fadlan'
-version = '2.0.9'
+version = '2.0.10'
 
 repositories {
     mavenCentral()
@@ -183,7 +183,7 @@ runtime {
         noConsole = true
     }
     options = [
-            '--compress', '2', '--no-header-files', '--no-man-pages',
+            '--no-header-files', '--no-man-pages',
     ]
     modules = [
             'java.base',
@@ -267,6 +267,7 @@ runtime {
 
         def iconPath = file("src/main/resources/icons/fireporter.$imgType") as File
         imageOptions += ['--icon', iconPath.absolutePath]
+        installerOptions += ['--icon', iconPath.absolutePath]
 
         def arch = System.getProperty("os.arch")
         installerName = "fireporter_$targetPlatformName-${arch}_v"
